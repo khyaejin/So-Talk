@@ -18,8 +18,9 @@ public class MessengerFrame extends JFrame {
     public MessengerFrame() {
         super("Messenger");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 800);
-        setLocation(200, 50);
+        setSize(350, 640);
+//        setLocation(200, 50); // 주연
+        setLocation(0, 0); // 혜진
 
         mainPanel = new JPanel(new BorderLayout());
         add(mainPanel);
