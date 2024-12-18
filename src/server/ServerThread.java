@@ -4,42 +4,63 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Scanner;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ServerThread extends Thread {
-    Scanner scn = new Scanner(System.in);
-    private String name;
-    final DataInputStream is;
-    final DataOutputStream os;
-    Socket s;
-    boolean active;
+    private final String name; // 클라이언트 이름
+    private final DataInputStream is;
+    private final DataOutputStream os;
+    private final Socket socket;
+    private boolean active;
 
-    public ServerThread(Socket s, String name, DataInputStream is, DataOutputStream os) {
+    public ServerThread(Socket socket, String name, DataInputStream is, DataOutputStream os) {
         this.is = is;
         this.os = os;
         this.name = name;
-        this.s = s;
+        this.socket = socket;
         this.active = true;
     }
 
     @Override
     public void run() {
-        String message;
-        while (true) {
+        try {
+            String message;
+            while (active) {
+                try {
+                    message = is.readUTF(); // 클라이언트로부터 메시지 읽기
+                    System.out.println(name + ": " + message);
+
+                    // 메시지 브로드캐스트
+                    broadcastMessage(name, message);
+                } catch (IOException e) {
+                    System.out.println(name + " disconnected.");
+                    active = false; // 스레드 종료
+                    break;
+                }
+            }
+        } finally {
+            cleanup(); // 리소스 정리
+        }
+    }
+
+    private void broadcastMessage(String sender, String message) {
+        for (ServerThread client : ServerM.list) {
             try {
-                message = is.readUTF();        // 어떤 클라이언트로 부터 들어오는 데이터를 읽어들여서
-                System.out.println(message);   // (일단 서버의 콘솔장에 출력해서 확인하고)
-                for (ServerThread t : ServerM.list) {        // ArrayList에 등록되어 있는 모든 사용자에게 순서대로 그 메시지 전달
-                    t.os.writeUTF(this.name + " : " + message);   // t 사용자와 통신하는 스레드 안의 os.writeUTF()를 호출하여 메시지 전달
+                if (client != this && client.active) { // 자신에게는 보내지 않음
+                    client.os.writeUTF(sender + ": " + message);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                break;
+                System.out.println("Error broadcasting to " + client.name);
             }
         }
+    }
+
+    private void cleanup() {
         try {
-            this.is.close();
-            this.os.close();
+            ServerM.list.remove(this); // 서버 리스트에서 제거
+            is.close();
+            os.close();
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
