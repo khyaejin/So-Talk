@@ -5,8 +5,8 @@ import java.awt.*;
 import java.io.DataOutputStream;
 
 /**
- * 메인 프레임 클래스.
- * 여러 화면 패널을 포함하며, 화면 전환 및 메시지 관리.
+ * 메인 프레임 클래스
+ * 여러 화면 패널을 포함하며, 화면 전환 및 메시지 관리
  */
 public class MessengerFrame extends JFrame {
     private JPanel mainPanel;
@@ -42,8 +42,8 @@ public class MessengerFrame extends JFrame {
     }
 
     // 채팅 메시지 업데이트
-    public void updateChattingRoomText(String message) {
-        chattingRoomPanel.updateChattingText(message); // 채팅방 텍스트 업데이트
+    public void updateChattingRoomText(String sender, String message, boolean isMyMessage) {
+        chattingRoomPanel.updateChattingText(sender, message, isMyMessage); // 채팅방 텍스트 업데이트
     }
 
     // 시작 화면 표시

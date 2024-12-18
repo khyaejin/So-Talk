@@ -40,7 +40,7 @@ public class StartPanel extends JPanel {
             String password = new String(passwordField.getPassword());
             System.out.println("아이디: " + id + ", 비밀번호: " + password);
 
-            if (id.equals("test1") && password.equals("1234")) {
+            if (id.equals("test1") && password.equals("1234") || id.equals("test2") && password.equals("1234")) {
                 frame.showHomePanel();
             } else {
                 JOptionPane.showMessageDialog(this, "아이디 혹은 비밀번호가 일치하지 않습니다.");

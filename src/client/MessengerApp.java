@@ -7,8 +7,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 /**
- * 애플리케이션의 주요 로직을 담당하는 클래스.
- * GUI 초기화 및 네트워크 연결 관리.
+ * 애플리케이션의 주요 로직을 담당하는 클래스
+ * GUI 초기화 및 네트워크 연결 관리
  */
 public class MessengerApp {
     final static int ServerPort = 6000; // 포트 번호
@@ -34,7 +34,7 @@ public class MessengerApp {
             while (true) {
                 try {
                     String message = inputStream.readUTF();
-                    frame.updateChattingRoomText("RECEIVED: " + message + "\n");
+                    frame.updateChattingRoomText("Server", message, false);
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;
