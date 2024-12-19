@@ -53,8 +53,11 @@ public class StartPanel extends JPanel {
                     String userId = id.equals("test1") ? "1" : "2"; // test1은 ID 1, test2는 ID 2
                     os.writeUTF("SET_ID:" + userId); // 서버에 ID 전송
                     os.writeUTF("SET_NAME:" + id); // 서버에 사용자 이름 전송
-                    frame.setUserName(id); // 사용자 이름 설정
 
+                    // 사용자 이름과 ID를 프레임에 설정
+                    frame.setUserNameAndId(id, userId);
+
+                    // 홈 화면으로 전환
                     frame.showHomePanel();
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(this, "서버와 연결할 수 없습니다.");
