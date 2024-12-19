@@ -13,11 +13,13 @@ public class ServerM {
     static ConcurrentHashMap<String, CopyOnWriteArrayList<ServerThread>> roomMap = new ConcurrentHashMap<>(); // 채팅방 관리
 
     public static void main(String[] args) throws IOException {
-        ServerSocket ssocket = new ServerSocket(6000); // 1. 서버 소켓 생성
+        // 1. 서버 소켓 생성
+        ServerSocket ssocket = new ServerSocket(6000);
 
         System.out.println("Server started on port 6000.");
 
-        while (true) { // 2. 클라이언트 연결을 기다리는 무한 루프
+        // 2. 클라이언트 연결을 기다리는 무한 루프
+        while (true) {
             try {
                 Socket clientSocket = ssocket.accept(); // 3. 클라이언트 연결 요청 수락
                 System.out.println("New client connected: " + clientSocket.getInetAddress());

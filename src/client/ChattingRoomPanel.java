@@ -30,7 +30,7 @@ public class ChattingRoomPanel extends JPanel {
 
 //        System.out.println("targetName: "+targetName);
         currentUserLabel = new JLabel("채팅중인 상대 이름: " + targetName); // 채팅방 상단에 상대방 이름 보여주기
-        currentUserLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        currentUserLabel.setFont(new Font("Pretendard", Font.PLAIN, 16));
         topPanel.add(currentUserLabel);
 
         // 채팅 메시지를 표시할 컨테이너 패널
@@ -74,47 +74,75 @@ public class ChattingRoomPanel extends JPanel {
         this.outputStream = os;
     }
 
+    // 채팅중인 상대 Id와 이름 설정
     public void setTargetIdAndName(String targetId, String targetName) {
         this.targetId = targetId;
         this.targetName = targetName;
 
         // 상단 이름 업데이트
         if (currentUserLabel != null) {
-            currentUserLabel.setText("채팅중인 상대 이름: " + targetName);
+//            currentUserLabel.setText("채팅중인 상대 이름: " + targetName);
+            currentUserLabel.setText(targetName);
         }
     }
 
     // 채팅 메시지를 화면에 추가
     public void updateChattingText(String sender, String message, boolean isMyMessage) {
+        // 채팅 컨테이너 레이아웃을 GridLayout으로 설정 (10개의 행, 1개의 열)
+        if (!(chatContainer.getLayout() instanceof GridLayout)) {
+            chatContainer.setLayout(new GridLayout(10, 1, 0, 9)); // 10개의 행, 1열, 행 간격 9px
+        }
+
         // 말풍선 스타일의 패널
-        JPanel messagePanel = new JPanel(new BorderLayout());
-        messagePanel.setOpaque(false);
+        // Jpanel은 override해서 ui 수정해주어야 함
+        JPanel messagePanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // 말풍선 스타일의 JLabel 생성 -> 나중에 말풍선 모양으로 수정
-        JLabel messageLabel = new JLabel("<html><div style='padding: 13px;'>"
-                + message.replaceAll("\n", "<br>") + "</div></html>");
-        messageLabel.setOpaque(true);
-        messageLabel.setBackground(isMyMessage ? new Color(0xFFEB3B) : Color.WHITE); // 노란색 / 흰색
-        messageLabel.setForeground(Color.BLACK);
-        messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+                // 둥근 사각형 배경 그리기
+                g2d.setColor(isMyMessage ? new Color(0xFFEB3B) : Color.WHITE); // 노란색 / 흰색
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15); // 둥근 사각형 (border-radius 15px)
+            }
+        };
+        messagePanel.setOpaque(false); // 배경 투명 처리
+        messagePanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10)); // 내부 여백 설정
 
-        // 정렬 설정
+        // 메시지 라벨 생성 (텍스트만 포함)
+        JLabel messageLabel = new JLabel("<html>" + message.replaceAll("\n", "<br>") + "</html>");
+        messageLabel.setForeground(Color.BLACK); // 텍스트 색상 설정
+        messagePanel.add(messageLabel, BorderLayout.CENTER); // 라벨을 패널에 추가
+
+        // 메시지 정렬 설정
         JPanel wrapper = new JPanel(new FlowLayout(isMyMessage ? FlowLayout.RIGHT : FlowLayout.LEFT));
-        wrapper.setOpaque(false);
-        wrapper.add(messageLabel);
+        wrapper.setOpaque(false); // 배경 투명
+        wrapper.add(messagePanel); // 말풍선 패널 추가
 
-        // 메시지 패널 추가 및 간격 설정
-        chatContainer.add(wrapper);
-        chatContainer.add(Box.createVerticalStrut(3)); // 메시지 간 간격 3px
+        // 현재 채팅 컨테이너의 컴포넌트 개수를 확인
+        int currentComponentCount = chatContainer.getComponentCount();
 
-        // 스크롤을 최하단으로 이동
+        // 메시지를 추가할 위치 계산
+        if (currentComponentCount < 10) {
+            // 메시지가 10개 이하일 경우: 빈 공간을 채우며 추가
+            chatContainer.add(wrapper, currentComponentCount);
+        } else {
+            // 메시지가 10개 이상일 경우: 가장 오래된 메시지를 제거하고 추가
+            // -> 무한스크롤로 해야 하는데... 너무 어려움 못하겠어요 흑흑 나중에 할래...
+            chatContainer.remove(0); // 첫 번째 메시지 제거
+            chatContainer.add(wrapper, 9); // 새 메시지를 마지막에 추가
+        }
+
+        // 스크롤을 항상 최하단으로 이동
         SwingUtilities.invokeLater(() -> {
             JScrollBar vertical = scrollPane.getVerticalScrollBar();
             vertical.setValue(vertical.getMaximum());
         });
 
-        revalidate();
-        repaint();
+        // 화면 갱신
+        chatContainer.revalidate();
+        chatContainer.repaint();
     }
 
     private void sendMessage() {

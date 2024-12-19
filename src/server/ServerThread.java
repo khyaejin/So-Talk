@@ -7,13 +7,13 @@ import java.net.Socket;
 import java.util.HashMap;
 
 public class ServerThread extends Thread {
-    private String name; // 클라이언트 이름
-    private String userId; // 클라이언트 ID
-    private String chattingWith; // 현재 채팅 중인 상대방 ID
     private final DataInputStream is;
     private final DataOutputStream os;
     private final Socket socket;
     private boolean active;
+    private String name; // 클라이언트 이름
+    private String userId; // 클라이언트 ID
+    private String chattingWith; // 현재 채팅 중인 상대방 ID
 
     // 서버 전체 클라이언트 ID 관리
     public static final HashMap<String, ServerThread> clientsById = new HashMap<>();
@@ -47,16 +47,6 @@ public class ServerThread extends Thread {
                     // 채팅 상대 설정
                     this.chattingWith = message.split(":")[1];
                     System.out.println("[Server] ID " + this.userId + "와 ID " + this.chattingWith + "의 채팅 시작");
-                } // 채팅 전송, 밑에 두개 하나로 수정해야함..
-                else if (message.startsWith("MESSAGE:")) {
-                    // 메시지를 설정된 채팅 상대에게 전송
-                    if (this.chattingWith != null) {
-                        String chatMessage = message.split(":", 2)[1];
-                        System.out.println("[Server] ID " + this.userId + "에서 ID " + this.chattingWith + "로 메시지 전달: " + chatMessage);
-                        sendMessageToId(this.chattingWith, "MESSAGE_FROM:" + this.userId + ":" + chatMessage);
-                    } else {
-                        System.out.println("[Server] 채팅 상대가 설정되지 않았습니다. 메시지를 전송할 수 없습니다.");
-                    }
                 } else if (message.startsWith("MESSAGE_TO_ID:")) {
                     String[] parts = message.split(":", 3);
                     if (parts.length == 3) {
