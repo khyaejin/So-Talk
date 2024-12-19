@@ -52,6 +52,16 @@ public class ServerThread extends Thread {
                     } else {
                         System.out.println("[Server] 채팅 상대가 설정되지 않았습니다. 메시지를 전송할 수 없습니다.");
                     }
+                } else if (message.startsWith("MESSAGE_TO_ID:")) {
+                    String[] parts = message.split(":", 3);
+                    if (parts.length == 3) {
+                        String targetId = parts[1];
+                        String chatMessage = parts[2];
+                        System.out.println("[Server] ID " + this.userId + "에서 ID " + targetId + "로 메시지 전달 요청: " + chatMessage);
+                        sendMessageToId(targetId, "MESSAGE_FROM:" + this.userId + ":" + chatMessage);
+                    } else {
+                        System.out.println("[Server] MESSAGE_TO_ID 명령의 형식이 잘못되었습니다: " + message);
+                    }
                 } else {
                     System.out.println("[Server] 알 수 없는 명령어입니다: " + message);
                 }

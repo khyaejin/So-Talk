@@ -90,20 +90,29 @@ public class ChattingRoomPanel extends JPanel {
 
     private void sendMessage() {
         String message = messageInputField.getText(); // 입력된 메시지 가져오기
-        if (message.isEmpty()) return;
+        if (message.isEmpty()) {
+            System.out.println("[Client] 빈 메시지는 전송되지 않습니다.");
+            return;
+        }
 
         try {
             // 내 메시지 UI 업데이트
             updateChattingText("Me", message, true);
 
             // 서버로 메시지 전송
+//            System.out.println("targetId:"+targetId);
             if (targetId != null) {
+                System.out.println("[Client] 메시지 전송: 대상 ID = " + targetId + ", 메시지 = " + message);
                 outputStream.writeUTF("MESSAGE_TO_ID:" + targetId + ":" + message);
+            } else {
+                System.out.println("[Client] 대상 ID가 설정되지 않았습니다. 메시지를 전송할 수 없습니다.");
             }
 
             messageInputField.setText(""); // 입력 필드 초기화
         } catch (IOException e) {
+            System.out.println("[Client] 메시지를 전송하는 중 오류가 발생했습니다.");
             e.printStackTrace();
         }
     }
+
 }
