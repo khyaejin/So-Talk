@@ -18,6 +18,7 @@ public class ChattingRoomPanel extends JPanel {
     private String targetId; // 메시지를 전송할 대상 ID
     private String targetName; // 메시지를 전송할 대상 Name
     private JLabel currentUserLabel; // 상단에 현재 사용자 이름 표시
+    ImageIcon translateImg = new ImageIcon("src/assets/Translate.png");
 
     public ChattingRoomPanel(MessengerFrame frame) {
         setLayout(new BorderLayout());
@@ -88,13 +89,11 @@ public class ChattingRoomPanel extends JPanel {
 
     // 채팅 메시지를 화면에 추가
     public void updateChattingText(String sender, String message, boolean isMyMessage) {
-        // 채팅 컨테이너 레이아웃을 GridLayout으로 설정 (10개의 행, 1개의 열)
         if (!(chatContainer.getLayout() instanceof GridLayout)) {
             chatContainer.setLayout(new GridLayout(10, 1, 0, 9)); // 10개의 행, 1열, 행 간격 9px
         }
 
         // 말풍선 스타일의 패널
-        // Jpanel은 override해서 ui 수정해주어야 함
         JPanel messagePanel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -113,12 +112,31 @@ public class ChattingRoomPanel extends JPanel {
         // 메시지 라벨 생성 (텍스트만 포함)
         JLabel messageLabel = new JLabel("<html>" + message.replaceAll("\n", "<br>") + "</html>");
         messageLabel.setForeground(Color.BLACK); // 텍스트 색상 설정
+        messageLabel.setMaximumSize(new Dimension(300, Integer.MAX_VALUE)); // 말풍선의 최대 너비 제한
         messagePanel.add(messageLabel, BorderLayout.CENTER); // 라벨을 패널에 추가
 
-        // 메시지 정렬 설정
-        JPanel wrapper = new JPanel(new FlowLayout(isMyMessage ? FlowLayout.RIGHT : FlowLayout.LEFT));
+        // 번역 버튼 생성
+        JButton translateButton = new JButton(new ImageIcon(translateImg.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+        translateButton.setPreferredSize(new Dimension(25, 25));
+        translateButton.setContentAreaFilled(false); // 배경 투명
+        translateButton.setBorderPainted(false); // 버튼 외곽선 제거
+        translateButton.setFocusPainted(false); // 버튼 포커스 제거
+        translateButton.addActionListener(e -> {
+            // 번역 버튼 클릭 시 동작 추가 예정
+            System.out.println("[Client] 번역 버튼 클릭됨: 메시지 = " + message);
+        });
+
+        // 메시지와 버튼을 포함할 패널 (말풍선 옆에 버튼 배치)
+        JPanel wrapper = new JPanel(new FlowLayout(isMyMessage ? FlowLayout.RIGHT : FlowLayout.LEFT, 5, 0));
         wrapper.setOpaque(false); // 배경 투명
-        wrapper.add(messagePanel); // 말풍선 패널 추가
+
+        if (isMyMessage) {
+            wrapper.add(translateButton); // 버튼을 왼쪽에 추가
+            wrapper.add(messagePanel);   // 말풍선을 오른쪽에 추가
+        } else {
+            wrapper.add(messagePanel);   // 말풍선을 왼쪽에 추가
+            wrapper.add(translateButton); // 버튼을 오른쪽에 추가
+        }
 
         // 현재 채팅 컨테이너의 컴포넌트 개수를 확인
         int currentComponentCount = chatContainer.getComponentCount();
@@ -129,7 +147,6 @@ public class ChattingRoomPanel extends JPanel {
             chatContainer.add(wrapper, currentComponentCount);
         } else {
             // 메시지가 10개 이상일 경우: 가장 오래된 메시지를 제거하고 추가
-            // -> 무한스크롤로 해야 하는데... 너무 어려움 못하겠어요 흑흑 나중에 할래...
             chatContainer.remove(0); // 첫 번째 메시지 제거
             chatContainer.add(wrapper, 9); // 새 메시지를 마지막에 추가
         }
