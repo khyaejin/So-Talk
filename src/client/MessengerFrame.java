@@ -17,7 +17,8 @@ public class MessengerFrame extends JFrame {
     private DataOutputStream outputStream; // 서버로 메시지 전송을 위한 출력 스트림
     private String userName; // 로그인한 사용자 이름
     private String userId; // 로그인한 사용자 ID
-    private String chattingPartner; // 현재 채팅 중인 상대방 이름
+    private String chattingPartnerId; // 현재 채팅 중인 상대방 ID
+    private String chattingPartnerName;
 
     public MessengerFrame() {
         super("Messenger");
@@ -46,7 +47,7 @@ public class MessengerFrame extends JFrame {
 
     // OutputStream 가져오기
     public DataOutputStream getOutputStream() {
-        return this.outputStream; // OutputStream 반환
+        return this.outputStream;
     }
 
     // 사용자 이름 및 ID 설정
@@ -64,17 +65,19 @@ public class MessengerFrame extends JFrame {
     }
 
     // 채팅 상대 설정 및 가져오기
-    public void setChattingPartner(String chattingPartner) {
-        this.chattingPartner = chattingPartner;
+    public void setChattingPartner(String targetId, String targetName) {
+        this.chattingPartnerId = targetId;
+        this.chattingPartnerName = targetName;
+        chattingRoomPanel.setTargetIdAndName(targetId,targetName); // ChattingRoomPanel에도 설정
     }
 
     public String getChattingPartner() {
-        return chattingPartner;
+        return chattingPartnerId;
     }
 
     // 채팅 메시지 업데이트
     public void updateChattingRoomText(String sender, String message, boolean isMyMessage) {
-        chattingRoomPanel.updateChattingText(sender, message, isMyMessage); // 채팅방 텍스트 업데이트
+        chattingRoomPanel.updateChattingText(sender, message, isMyMessage);
     }
 
     // 시작 화면 표시
@@ -98,10 +101,16 @@ public class MessengerFrame extends JFrame {
     }
 
     // 채팅방 화면 표시
-    public void showChattingRoomPanel() {
+    public void showChattingRoomPanel(String targetId, String targetName) {
+        chattingRoomPanel.setTargetIdAndName(targetId, targetName); // 상대방 ID와 이름 설정
         mainPanel.removeAll();
         mainPanel.add(chattingRoomPanel, BorderLayout.CENTER);
         mainPanel.revalidate();
         mainPanel.repaint();
+    }
+
+    // ChattingRoomPanel 객체를 가져오는 메서드
+    public ChattingRoomPanel getChattingRoomPanel() {
+        return chattingRoomPanel;
     }
 }

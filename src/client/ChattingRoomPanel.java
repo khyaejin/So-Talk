@@ -9,15 +9,29 @@ import java.io.IOException;
  * 채팅방 화면 패널 (채팅방 상세보기)
  * 메시지 송수신 처리
  */
+
 public class ChattingRoomPanel extends JPanel {
     private JPanel chatContainer; // 채팅 메시지 패널
     private JScrollPane scrollPane;
     private JTextField messageInputField; // 채팅 입력 필드
     private DataOutputStream outputStream; // 서버로 메시지 전송을 위한 출력 스트림
+    private String targetId; // 메시지를 전송할 대상 ID
+    private String targetName; // 메시지를 전송할 대상 Name
+    private JLabel currentUserLabel; // 상단에 현재 사용자 이름 표시
 
     public ChattingRoomPanel(MessengerFrame frame) {
         setLayout(new BorderLayout());
         setBackground(new Color(0xB9CEE0));
+
+        // 현재 로그인한 사용자 이름을 표시하는 상단 패널
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setBackground(new Color(0xD6E4F2));
+        topPanel.setPreferredSize(new Dimension(0, 50)); // 높이 50으로 설정
+
+//        System.out.println("targetName: "+targetName);
+        currentUserLabel = new JLabel("채팅중인 상대 이름: " + targetName); // 채팅방 상단에 상대방 이름 보여주기
+        currentUserLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        topPanel.add(currentUserLabel);
 
         // 채팅 메시지를 표시할 컨테이너 패널
         chatContainer = new JPanel();
@@ -31,7 +45,7 @@ public class ChattingRoomPanel extends JPanel {
 
         // 채팅 입력 영역 (JTextField)
         messageInputField = new JTextField();
-        messageInputField.setPreferredSize(new Dimension(0, 40)); // 높이를 40으로 설정
+        messageInputField.setPreferredSize(new Dimension(0, 30));
         messageInputField.addActionListener(e -> sendMessage());
 
         // 전송 버튼 (JButton)
@@ -46,12 +60,28 @@ public class ChattingRoomPanel extends JPanel {
         inputPanel.add(sendButton, BorderLayout.EAST);
 
         // 메인 패널에 컴포넌트 추가
-        add(scrollPane, BorderLayout.CENTER);
-        add(inputPanel, BorderLayout.SOUTH);
+        add(topPanel, BorderLayout.NORTH); // 상단 패널 추가
+        add(scrollPane, BorderLayout.CENTER); // 채팅 메시지 패널 추가
+        add(inputPanel, BorderLayout.SOUTH); // 입력 패널 추가
+    }
+
+    // 현재 로그인한 사용자 이름 설정
+    public void setCurrentUserName(String userName) {
+        currentUserLabel.setText("로그인한 사용자: " + userName);
     }
 
     public void setOutputStream(DataOutputStream os) {
         this.outputStream = os;
+    }
+
+    public void setTargetIdAndName(String targetId, String targetName) {
+        this.targetId = targetId;
+        this.targetName = targetName;
+
+        // 상단 이름 업데이트
+        if (currentUserLabel != null) {
+            currentUserLabel.setText("채팅중인 상대 이름: " + targetName);
+        }
     }
 
     // 채팅 메시지를 화면에 추가
@@ -60,7 +90,7 @@ public class ChattingRoomPanel extends JPanel {
         JPanel messagePanel = new JPanel(new BorderLayout());
         messagePanel.setOpaque(false);
 
-        // 말풍선 스타일의 JLabel 생성
+        // 말풍선 스타일의 JLabel 생성 -> 나중에 말풍선 모양으로 수정
         JLabel messageLabel = new JLabel("<html><div style='padding: 13px;'>"
                 + message.replaceAll("\n", "<br>") + "</div></html>");
         messageLabel.setOpaque(true);
@@ -89,17 +119,26 @@ public class ChattingRoomPanel extends JPanel {
 
     private void sendMessage() {
         String message = messageInputField.getText(); // 입력된 메시지 가져오기
-        if (message.isEmpty()) return;
+        if (message.isEmpty()) {
+            System.out.println("[Client] 빈 메시지는 전송되지 않습니다.");
+            return;
+        }
 
         try {
             // 내 메시지 UI 업데이트
             updateChattingText("Me", message, true);
 
             // 서버로 메시지 전송
-            outputStream.writeUTF(message);
+            if (targetId != null) {
+                System.out.println("[Client] 메시지 전송: 대상 ID = " + targetId + ", 메시지 = " + message);
+                outputStream.writeUTF("MESSAGE_TO_ID:" + targetId + ":" + message);
+            } else {
+                System.out.println("[Client] 대상 ID가 설정되지 않았습니다. 메시지를 전송할 수 없습니다.");
+            }
 
             messageInputField.setText(""); // 입력 필드 초기화
         } catch (IOException e) {
+            System.out.println("[Client] 메시지를 전송하는 중 오류가 발생했습니다.");
             e.printStackTrace();
         }
     }
