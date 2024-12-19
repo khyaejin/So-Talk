@@ -5,15 +5,12 @@ import java.awt.*;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-/**
- * 채팅방 화면 패널 (채팅방 상세보기)
- * 메시지 송수신 처리
- */
 public class ChattingRoomPanel extends JPanel {
     private JPanel chatContainer; // 채팅 메시지 패널
     private JScrollPane scrollPane;
     private JTextField messageInputField; // 채팅 입력 필드
     private DataOutputStream outputStream; // 서버로 메시지 전송을 위한 출력 스트림
+    private String targetId; // 메시지를 전송할 대상 ID
 
     public ChattingRoomPanel(MessengerFrame frame) {
         setLayout(new BorderLayout());
@@ -52,6 +49,10 @@ public class ChattingRoomPanel extends JPanel {
 
     public void setOutputStream(DataOutputStream os) {
         this.outputStream = os;
+    }
+
+    public void setTargetId(String targetId) {
+        this.targetId = targetId;
     }
 
     // 채팅 메시지를 화면에 추가
@@ -96,7 +97,9 @@ public class ChattingRoomPanel extends JPanel {
             updateChattingText("Me", message, true);
 
             // 서버로 메시지 전송
-            outputStream.writeUTF(message);
+            if (targetId != null) {
+                outputStream.writeUTF("MESSAGE_TO_ID:" + targetId + ":" + message);
+            }
 
             messageInputField.setText(""); // 입력 필드 초기화
         } catch (IOException e) {

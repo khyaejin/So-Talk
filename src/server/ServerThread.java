@@ -4,8 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ServerThread extends Thread {
     private String name; // 클라이언트 이름
@@ -39,18 +39,12 @@ public class ServerThread extends Thread {
                 } else if (message.startsWith("SET_NAME:")) {
                     this.name = message.split(":")[1];
                     System.out.println("Client set name: " + this.name);
-                } else if (message.startsWith("JOIN_ROOM:")) {
-                    this.roomName = message.split(":")[1];
-                    ServerM.roomMap.computeIfAbsent(roomName, k -> new CopyOnWriteArrayList<>()).add(this);
-                    System.out.println(this.name + " joined room: " + this.roomName);
                 } else if (message.startsWith("MESSAGE_TO_ID:")) {
+                    // 특정 사용자에게 메시지 전송
                     String[] parts = message.split(":", 3);
                     String targetId = parts[1];
                     String chatMessage = parts[2];
-                    sendMessageToId(targetId, chatMessage);
-                } else if (message.startsWith("MESSAGE:")) {
-                    String chatMessage = message.split(":", 2)[1];
-                    broadcastMessage(chatMessage);
+                    sendMessageToId(targetId, "From " + userId + ": " + chatMessage);
                 } else {
                     System.out.println("Unknown command: " + message);
                 }
@@ -63,29 +57,12 @@ public class ServerThread extends Thread {
         }
     }
 
-    private void broadcastMessage(String message) {
-        if (roomName == null) {
-            System.out.println("Client " + this.name + " is not in a room.");
-            return;
-        }
-
-        for (ServerThread client : ServerM.roomMap.get(roomName)) {
-            try {
-                if (client != this && client.active) {
-                    client.os.writeUTF(message);
-                }
-            } catch (IOException e) {
-                System.out.println("Error broadcasting to " + client.name);
-            }
-        }
-    }
-
     private void sendMessageToId(String targetId, String message) {
         ServerThread targetClient = clientsById.get(targetId);
         if (targetClient != null && targetClient.active) {
             try {
-                targetClient.os.writeUTF(message);
-                System.out.println("Message sent to ID " + targetId + ": " + message);
+                targetClient.os.writeUTF(message); // 대상 클라이언트에 메시지 전송
+                System.out.println(this.userId + "로 부터 " + targetId + "에게 메세지 보내기: " + message);
             } catch (IOException e) {
                 System.out.println("Error sending message to ID " + targetId);
             }
@@ -96,12 +73,6 @@ public class ServerThread extends Thread {
 
     private void cleanup() {
         try {
-            if (roomName != null) {
-                ServerM.roomMap.get(roomName).remove(this);
-                if (ServerM.roomMap.get(roomName).isEmpty()) {
-                    ServerM.roomMap.remove(roomName);
-                }
-            }
             if (userId != null) {
                 clientsById.remove(userId);
             }
