@@ -2,6 +2,8 @@ package client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 /**
  * 로그인 화면 패널
@@ -44,10 +46,23 @@ public class StartPanel extends JPanel {
         loginButton.addActionListener(e -> {
             String id = idField.getText();
             String password = new String(passwordField.getPassword());
-            System.out.println("아이디: " + id + ", 비밀번호: " + password);
 
             if (id.equals("test1") && password.equals("1234") || id.equals("test2") && password.equals("1234")) {
-                frame.showHomePanel();
+                try {
+                    DataOutputStream os = frame.getOutputStream();
+                    String userId = id.equals("test1") ? "1" : "2"; // test1은 ID 1, test2는 ID 2
+                    os.writeUTF("SET_ID:" + userId); // 서버에 ID 전송
+                    os.writeUTF("SET_NAME:" + id); // 서버에 사용자 이름 전송
+
+                    // 사용자 이름과 ID를 프레임에 설정
+                    frame.setUserNameAndId(id, userId);
+
+                    // 홈 화면으로 전환
+                    frame.showHomePanel();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, "서버와 연결할 수 없습니다.");
+                    ex.printStackTrace();
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "아이디 혹은 비밀번호가 일치하지 않습니다.");
             }
