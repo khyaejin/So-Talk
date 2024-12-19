@@ -6,7 +6,8 @@ import java.io.DataOutputStream;
 
 /**
  * 메인 프레임 클래스
- * 여러 화면 패널을 포함하며, 화면 전환 및 메시지 관리
+ * 여러 화면 패널을 포함
+ * 화면 전환 및 메시지 관리
  */
 public class MessengerFrame extends JFrame {
     private JPanel mainPanel;
@@ -18,8 +19,9 @@ public class MessengerFrame extends JFrame {
     public MessengerFrame() {
         super("Messenger");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 800);
-        setLocation(200, 50);
+        setSize(350, 640);
+//        setLocation(200, 50); // 주연
+        setLocation(0, 0); // 혜진
 
         mainPanel = new JPanel(new BorderLayout());
         add(mainPanel);

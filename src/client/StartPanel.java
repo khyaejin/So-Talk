@@ -11,7 +11,7 @@ public class StartPanel extends JPanel {
     public StartPanel(MessengerFrame frame) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(new Color(0xFEE502));
-        setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        setBorder(BorderFactory.createEmptyBorder(70, 50, 0, 50)); // 위쪽 여백 추가
 
         // 이미지 추가
         ImageIcon kakao = new ImageIcon("src/assets/kakaoLogo.png");
@@ -20,6 +20,9 @@ public class StartPanel extends JPanel {
         JLabel kakaoLabel = new JLabel(new ImageIcon(scaledImg));
         kakaoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(kakaoLabel);
+
+        // 위쪽 여백 추가
+        add(Box.createVerticalStrut(10));
 
         // 아이디 입력 필드
         JTextField idField = new JTextField();
@@ -30,6 +33,9 @@ public class StartPanel extends JPanel {
         JPasswordField passwordField = new JPasswordField();
         passwordField.setMaximumSize(new Dimension(230, 43));
         add(passwordField);
+
+        // 여백 추가
+        add(Box.createVerticalStrut(7));
 
         // 로그인 버튼
         JButton loginButton = new JButton("로그인");

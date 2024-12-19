@@ -4,8 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * 홈 화면 패널.
- * 메뉴 및 채팅방 리스트를 표시.
+ * 홈 화면 패널
+ * 메뉴 및 채팅방 리스트를 표시 (채팅방 전체보기)
  */
 public class HomePanel extends JPanel {
 
