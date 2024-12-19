@@ -18,6 +18,7 @@ public class MessengerFrame extends JFrame {
     private String userName; // 로그인한 사용자 이름
     private String userId; // 로그인한 사용자 ID
     private String chattingPartnerId; // 현재 채팅 중인 상대방 ID
+    private String chattingPartnerName;
 
     public MessengerFrame() {
         super("Messenger");
@@ -64,9 +65,10 @@ public class MessengerFrame extends JFrame {
     }
 
     // 채팅 상대 설정 및 가져오기
-    public void setChattingPartner(String partnerId) {
-        this.chattingPartnerId = partnerId;
-        chattingRoomPanel.setTargetId(partnerId); // ChattingRoomPanel에도 설정
+    public void setChattingPartner(String targetId, String targetName) {
+        this.chattingPartnerId = targetId;
+        this.chattingPartnerName = targetName;
+        chattingRoomPanel.setTargetIdAndName(targetId,targetName); // ChattingRoomPanel에도 설정
     }
 
     public String getChattingPartner() {
@@ -99,7 +101,8 @@ public class MessengerFrame extends JFrame {
     }
 
     // 채팅방 화면 표시
-    public void showChattingRoomPanel() {
+    public void showChattingRoomPanel(String targetId, String targetName) {
+        chattingRoomPanel.setTargetIdAndName(targetId, targetName); // 상대방 ID와 이름 설정
         mainPanel.removeAll();
         mainPanel.add(chattingRoomPanel, BorderLayout.CENTER);
         mainPanel.revalidate();

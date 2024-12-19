@@ -32,18 +32,23 @@ public class ServerThread extends Thread {
                 String message = is.readUTF(); // 클라이언트로부터 메시지 읽기
                 System.out.println("[Server] 메시지 수신: " + message);
 
+                // 메세지 형식으로 구분(이래도 되나? 몰루 ㅠ)
+                // 클라이언트 ID 설정
                 if (message.startsWith("SET_ID:")) {
                     this.userId = message.split(":")[1];
                     clientsById.put(this.userId, this); // ID로 클라이언트를 저장
                     System.out.println("[Server] 클라이언트 ID가 설정됨: " + this.userId);
-                } else if (message.startsWith("SET_NAME:")) {
+                } // 클라이언트 Name 설정
+                else if (message.startsWith("SET_NAME:")) {
                     this.name = message.split(":")[1];
                     System.out.println("[Server] 클라이언트 이름이 설정딤: " + this.name);
-                } else if (message.startsWith("CHAT_WITH:")) {
+                } // 채팅 상대 설정(채팅방 입장 시)
+                else if (message.startsWith("CHAT_WITH:")) {
                     // 채팅 상대 설정
                     this.chattingWith = message.split(":")[1];
                     System.out.println("[Server] ID " + this.userId + "와 ID " + this.chattingWith + "의 채팅 시작");
-                } else if (message.startsWith("MESSAGE:")) {
+                } // 채팅 전송, 밑에 두개 하나로 수정해야함..
+                else if (message.startsWith("MESSAGE:")) {
                     // 메시지를 설정된 채팅 상대에게 전송
                     if (this.chattingWith != null) {
                         String chatMessage = message.split(":", 2)[1];
@@ -87,7 +92,6 @@ public class ServerThread extends Thread {
             System.out.println("[Server] ID " + targetId + " 클라이언트가 비활성 상태이거나 존재하지 않습니다.");
         }
     }
-
     private void cleanup() {
         try {
             if (userId != null) {
