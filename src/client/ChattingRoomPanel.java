@@ -1,5 +1,7 @@
 package client;
 
+import api.GoogleTranslate;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.DataOutputStream;
@@ -18,6 +20,7 @@ public class ChattingRoomPanel extends JPanel {
     private String targetId; // 메시지를 전송할 대상 ID
     private String targetName; // 메시지를 전송할 대상 Name
     private JLabel currentUserLabel; // 상단에 현재 사용자 이름 표시
+    private GoogleTranslate googleTranslate; // google cloud translation api 사용을 위한 클래스
     ImageIcon translateImg = new ImageIcon("src/assets/Translate.png");
 
     public ChattingRoomPanel(MessengerFrame frame) {
