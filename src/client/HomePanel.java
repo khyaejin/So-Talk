@@ -79,7 +79,7 @@ public class HomePanel extends JPanel {
                     try {
                         DataOutputStream os = frame.getOutputStream();
                         os.writeUTF("CHAT_WITH:" + userId); // 서버에 상대방 ID 전송
-                        frame.setChattingPartner(chatRoomName); // 상대방 이름 설정
+                        frame.setChattingPartner(userId); // 상대방 ID 설정
                         frame.showChattingRoomPanel();
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(this, "서버와 연결할 수 없습니다.");
