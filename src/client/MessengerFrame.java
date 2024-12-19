@@ -15,12 +15,13 @@ public class MessengerFrame extends JFrame {
     private HomePanel homePanel;
     private ChattingRoomPanel chattingRoomPanel;
     private DataOutputStream outputStream; // 서버로 메시지 전송을 위한 출력 스트림
+    private String userName; // 로그인한 사용자 이름
+    private String chattingPartner; // 현재 채팅 중인 상대방 이름
 
     public MessengerFrame() {
         super("Messenger");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(350, 640);
-//        setLocation(200, 50); // 주연
         setLocation(0, 0); // 혜진
 
         mainPanel = new JPanel(new BorderLayout());
@@ -43,9 +44,32 @@ public class MessengerFrame extends JFrame {
         chattingRoomPanel.setOutputStream(os); // 채팅방 패널에도 출력 스트림 전달
     }
 
+    // OutputStream 가져오기
+    public DataOutputStream getOutputStream() {
+        return this.outputStream; // OutputStream 반환
+    }
+
     // 채팅 메시지 업데이트
     public void updateChattingRoomText(String sender, String message, boolean isMyMessage) {
         chattingRoomPanel.updateChattingText(sender, message, isMyMessage); // 채팅방 텍스트 업데이트
+    }
+
+    // 사용자 이름 설정 및 가져오기
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    // 채팅 상대 설정 및 가져오기
+    public void setChattingPartner(String chattingPartner) {
+        this.chattingPartner = chattingPartner;
+    }
+
+    public String getChattingPartner() {
+        return chattingPartner;
     }
 
     // 시작 화면 표시

@@ -61,7 +61,7 @@ public class ChattingRoomPanel extends JPanel {
         messagePanel.setOpaque(false);
 
         // 말풍선 스타일의 JLabel 생성
-        JLabel messageLabel = new JLabel("<html><div style='padding: 10px;'>"
+        JLabel messageLabel = new JLabel("<html><div style='padding: 13px;'>"
                 + message.replaceAll("\n", "<br>") + "</div></html>");
         messageLabel.setOpaque(true);
         messageLabel.setBackground(isMyMessage ? new Color(0xFFEB3B) : Color.WHITE); // 노란색 / 흰색
