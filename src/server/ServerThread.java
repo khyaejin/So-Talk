@@ -28,7 +28,7 @@ public class ServerThread extends Thread {
             while (active) {
                 try {
                     message = is.readUTF(); // 클라이언트로부터 메시지 읽기
-                    System.out.println(name + ": " + message);
+                    System.out.println(message);
 
                     // 메시지 브로드캐스트
                     broadcastMessage(name, message);
@@ -47,7 +47,7 @@ public class ServerThread extends Thread {
         for (ServerThread client : ServerM.list) {
             try {
                 if (client != this && client.active) { // 자신에게는 보내지 않음
-                    client.os.writeUTF(sender + ": " + message);
+                    client.os.writeUTF(message);
                 }
             } catch (IOException e) {
                 System.out.println("Error broadcasting to " + client.name);

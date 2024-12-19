@@ -6,7 +6,8 @@ import java.io.DataOutputStream;
 
 /**
  * 메인 프레임 클래스
- * 여러 화면 패널을 포함하며, 화면 전환 및 메시지 관리
+ * 여러 화면 패널을 포함
+ * 화면 전환 및 메시지 관리
  */
 public class MessengerFrame extends JFrame {
     private JPanel mainPanel;

@@ -6,8 +6,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
- * 채팅룸 화면 패널
- * 메시지 전송 및 수신을 처리
+ * 채팅방 화면 패널 (채팅방 상세보기)
+ * 메시지 송수신 처리
  */
 public class ChattingRoomPanel extends JPanel {
     private JPanel chatContainer; // 채팅 메시지 패널
@@ -23,6 +23,7 @@ public class ChattingRoomPanel extends JPanel {
         chatContainer = new JPanel();
         chatContainer.setLayout(new BoxLayout(chatContainer, BoxLayout.Y_AXIS));
         chatContainer.setBackground(new Color(0xB9CEE0));
+        chatContainer.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // 좌우 여백
 
         // 스크롤 추가
         scrollPane = new JScrollPane(chatContainer);
@@ -55,7 +56,8 @@ public class ChattingRoomPanel extends JPanel {
 
     // 채팅 메시지를 화면에 추가
     public void updateChattingText(String sender, String message, boolean isMyMessage) {
-        JPanel messagePanel = new JPanel(new FlowLayout(isMyMessage ? FlowLayout.RIGHT : FlowLayout.LEFT));
+        // 말풍선 스타일의 패널
+        JPanel messagePanel = new JPanel(new BorderLayout());
         messagePanel.setOpaque(false);
 
         // 말풍선 스타일의 JLabel 생성
@@ -66,10 +68,14 @@ public class ChattingRoomPanel extends JPanel {
         messageLabel.setForeground(Color.BLACK);
         messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-        // 패널에 메시지 추가
-        messagePanel.add(messageLabel);
-        chatContainer.add(messagePanel);
-        chatContainer.add(Box.createVerticalStrut(5)); // 메시지 간 간격 추가
+        // 정렬 설정
+        JPanel wrapper = new JPanel(new FlowLayout(isMyMessage ? FlowLayout.RIGHT : FlowLayout.LEFT));
+        wrapper.setOpaque(false);
+        wrapper.add(messageLabel);
+
+        // 메시지 패널 추가 및 간격 설정
+        chatContainer.add(wrapper);
+        chatContainer.add(Box.createVerticalStrut(3)); // 메시지 간 간격 3px
 
         // 스크롤을 최하단으로 이동
         SwingUtilities.invokeLater(() -> {
