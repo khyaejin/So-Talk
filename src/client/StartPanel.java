@@ -50,7 +50,9 @@ public class StartPanel extends JPanel {
             if (id.equals("test1") && password.equals("1234") || id.equals("test2") && password.equals("1234")) {
                 try {
                     DataOutputStream os = frame.getOutputStream();
-                    os.writeUTF(id); // 서버에 사용자 이름 전송
+                    String userId = id.equals("test1") ? "1" : "2"; // test1은 ID 1, test2는 ID 2
+                    os.writeUTF("SET_ID:" + userId); // 서버에 ID 전송
+                    os.writeUTF("SET_NAME:" + id); // 서버에 사용자 이름 전송
                     frame.setUserName(id); // 사용자 이름 설정
 
                     frame.showHomePanel();
