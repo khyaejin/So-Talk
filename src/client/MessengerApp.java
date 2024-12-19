@@ -29,43 +29,27 @@ public class MessengerApp {
         outputStream = new DataOutputStream(socket.getOutputStream());
         frame.setOutputStream(outputStream); // 프레임에 출력 스트림 전달
 
-        // 로그인 후 사용자 ID 전송
-        frame.showStartPanel();
-        waitForLogin();
-
         // 메시지 수신 스레드 시작
         new Thread(() -> {
             while (true) {
                 try {
                     String message = inputStream.readUTF();
-                    frame.updateChattingRoomText("Server", message, false);
+                    System.out.println("[Client] 메시지 수신: " + message);
+
+                    // 메시지가 수신되면 ChattingRoomPanel에 업데이트
+                    if (message.startsWith("MESSAGE_FROM:")) {
+                        String[] parts = message.split(":", 3);
+                        String senderId = parts[1];
+                        String chatMessage = parts[2];
+
+                        // 상대방의 메시지를 채팅방에 업데이트
+                        frame.getChattingRoomPanel().updateChattingText("ID " + senderId, chatMessage, false);
+                        System.out.println("[Client] ID " + senderId + "로부터 메시지 수신: " + chatMessage);
+                    }
                 } catch (IOException e) {
+                    System.out.println("[Client] 서버와의 연결이 끊어졌습니다.");
                     e.printStackTrace();
                     break;
-                }
-            }
-        }).start();
-    }
-
-    private void waitForLogin() {
-        new Thread(() -> {
-            while (true) {
-                try {
-                    // 사용자 이름이 설정되었는지 확인
-                    String userName = frame.getUserName();
-                    if (userName != null && !userName.isEmpty()) {
-                        String userId = frame.getUserId();
-                        if (userId != null) {
-                            // 서버에 ID와 이름 전송
-                            outputStream.writeUTF("SET_ID:" + userId);
-                            outputStream.writeUTF("SET_NAME:" + userName);
-                            frame.showHomePanel(); // 홈 화면으로 전환
-                            break;
-                        }
-                    }
-                    Thread.sleep(100); // 짧은 대기 후 다시 확인
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
                 }
             }
         }).start();

@@ -104,4 +104,10 @@ public class MessengerFrame extends JFrame {
         mainPanel.revalidate();
         mainPanel.repaint();
     }
+
+    // ChattingRoomPanel 객체를 가져오는 메서드
+    public ChattingRoomPanel getChattingRoomPanel() {
+        return chattingRoomPanel;
+    }
+
 }

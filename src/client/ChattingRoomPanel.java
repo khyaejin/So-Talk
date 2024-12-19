@@ -28,7 +28,7 @@ public class ChattingRoomPanel extends JPanel {
 
         // 채팅 입력 영역 (JTextField)
         messageInputField = new JTextField();
-        messageInputField.setPreferredSize(new Dimension(0, 40)); // 높이를 40으로 설정
+        messageInputField.setPreferredSize(new Dimension(0, 20));
         messageInputField.addActionListener(e -> sendMessage());
 
         // 전송 버튼 (JButton)

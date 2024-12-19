@@ -5,12 +5,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ServerThread extends Thread {
     private String name; // 클라이언트 이름
-    private String roomName; // 클라이언트가 속한 채팅방 이름
     private String userId; // 클라이언트 ID
+    private String chattingWith; // 현재 채팅 중인 상대방 ID
     private final DataInputStream is;
     private final DataOutputStream os;
     private final Socket socket;
@@ -31,26 +30,34 @@ public class ServerThread extends Thread {
         try {
             while (active) {
                 String message = is.readUTF(); // 클라이언트로부터 메시지 읽기
+                System.out.println("[Server] 메시지 수신: " + message);
 
                 if (message.startsWith("SET_ID:")) {
                     this.userId = message.split(":")[1];
                     clientsById.put(this.userId, this); // ID로 클라이언트를 저장
-                    System.out.println("Client set ID: " + this.userId);
+                    System.out.println("[Server] 클라이언트 ID가 설정됨: " + this.userId);
                 } else if (message.startsWith("SET_NAME:")) {
                     this.name = message.split(":")[1];
-                    System.out.println("Client set name: " + this.name);
-                } else if (message.startsWith("MESSAGE_TO_ID:")) {
-                    // 특정 사용자에게 메시지 전송
-                    String[] parts = message.split(":", 3);
-                    String targetId = parts[1];
-                    String chatMessage = parts[2];
-                    sendMessageToId(targetId, "From " + userId + ": " + chatMessage);
+                    System.out.println("[Server] 클라이언트 이름이 설정딤: " + this.name);
+                } else if (message.startsWith("CHAT_WITH:")) {
+                    // 채팅 상대 설정
+                    this.chattingWith = message.split(":")[1];
+                    System.out.println("[Server] ID " + this.userId + "와 ID " + this.chattingWith + "의 채팅 시작");
+                } else if (message.startsWith("MESSAGE:")) {
+                    // 메시지를 설정된 채팅 상대에게 전송
+                    if (this.chattingWith != null) {
+                        String chatMessage = message.split(":", 2)[1];
+                        System.out.println("[Server] ID " + this.userId + "에서 ID " + this.chattingWith + "로 메시지 전달: " + chatMessage);
+                        sendMessageToId(this.chattingWith, "MESSAGE_FROM:" + this.userId + ":" + chatMessage);
+                    } else {
+                        System.out.println("[Server] 채팅 상대가 설정되지 않았습니다. 메시지를 전송할 수 없습니다.");
+                    }
                 } else {
-                    System.out.println("Unknown command: " + message);
+                    System.out.println("[Server] 알 수 없는 명령어입니다: " + message);
                 }
             }
         } catch (IOException e) {
-            System.out.println("Client disconnected: " + this.name);
+            System.out.println("[Server] 클라이언트 연결이 종료되었습니다: ID " + this.userId);
             active = false; // 스레드 종료
         } finally {
             cleanup();
@@ -61,13 +68,13 @@ public class ServerThread extends Thread {
         ServerThread targetClient = clientsById.get(targetId);
         if (targetClient != null && targetClient.active) {
             try {
+                System.out.println("[Server] ID " + targetId + "에게 메시지를 전송합니다: " + message);
                 targetClient.os.writeUTF(message); // 대상 클라이언트에 메시지 전송
-                System.out.println(this.userId + "로 부터 " + targetId + "에게 메세지 보내기: " + message);
             } catch (IOException e) {
-                System.out.println("Error sending message to ID " + targetId);
+                System.out.println("[Server] ID " + targetId + "로 메시지를 전송하는 중 오류가 발생했습니다.");
             }
         } else {
-            System.out.println("Client with ID " + targetId + " not found or inactive.");
+            System.out.println("[Server] ID " + targetId + " 클라이언트가 비활성 상태이거나 존재하지 않습니다.");
         }
     }
 
@@ -75,6 +82,7 @@ public class ServerThread extends Thread {
         try {
             if (userId != null) {
                 clientsById.remove(userId);
+                System.out.println("[Server] ID " + userId + " 클라이언트가 제거되었습니다.");
             }
             is.close();
             os.close();
