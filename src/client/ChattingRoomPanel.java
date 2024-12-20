@@ -1,5 +1,7 @@
 package client;
 
+import api.GoogleTranslate;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.DataOutputStream;
@@ -18,9 +20,13 @@ public class ChattingRoomPanel extends JPanel {
     private String targetId; // 메시지를 전송할 대상 ID
     private String targetName; // 메시지를 전송할 대상 Name
     private JLabel currentUserLabel; // 상단에 현재 사용자 이름 표시
+    private GoogleTranslate googleTranslate; // google cloud translation api 사용을 위한 클래스
     ImageIcon translateImg = new ImageIcon("src/assets/Translate.png");
 
     public ChattingRoomPanel(MessengerFrame frame) {
+        // GoogleTranslate 객체 초기화
+        this.googleTranslate = new GoogleTranslate();
+
         setLayout(new BorderLayout());
         setBackground(new Color(0xB9CEE0));
 
@@ -122,8 +128,17 @@ public class ChattingRoomPanel extends JPanel {
         translateButton.setBorderPainted(false); // 버튼 외곽선 제거
         translateButton.setFocusPainted(false); // 버튼 포커스 제거
         translateButton.addActionListener(e -> {
-            // 번역 버튼 클릭 시 동작 추가 예정
-            System.out.println("[Client] 번역 버튼 클릭됨: 메시지 = " + message);
+            try {
+                // Google Translate API를 통해 번역
+                String translatedText = googleTranslate.translate(message, "en"); // 번역할 텍스트와 대상 언어 지정
+                System.out.println("[Client] 번역 결과: " + translatedText);
+
+                // 번역 결과를 별도의 말풍선으로 추가
+                updateChattingText("Translated", translatedText, false);
+            } catch (Exception ex) {
+                System.out.println("[Client] 번역 중 오류 발생: " + ex.getMessage());
+                ex.printStackTrace();
+            }
         });
 
         // 메시지와 버튼을 포함할 패널 (말풍선 옆에 버튼 배치)
@@ -162,6 +177,7 @@ public class ChattingRoomPanel extends JPanel {
         chatContainer.repaint();
     }
 
+    // 메세지 전송
     private void sendMessage() {
         String message = messageInputField.getText(); // 입력된 메시지 가져오기
         if (message.isEmpty()) {
