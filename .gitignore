@@ -32,4 +32,4 @@ bin/
 /src/api/google-key.json
 /src/api/so-talk-OAuth2.json
 ### 임시
-/src/api
+/src/api/*
