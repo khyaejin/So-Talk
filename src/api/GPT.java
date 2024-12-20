@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class GPT {
-    public static String chatWithGPT(String prompt, String apiKey) {
+    public String chatWithGPT(String prompt, String apiKey) {
         try {
             String apiUrl = "https://api.openai.com/v1/completions";
             URL url = new URL(apiUrl);
@@ -47,13 +47,5 @@ public class GPT {
             e.printStackTrace();
             return "Error occurred while communicating with GPT.";
         }
-    }
-
-    public static void main(String[] args) {
-        String apiKey = "YOUR_OPENAI_API_KEY"; // OpenAI API 키
-        String prompt = "Translate this sentence to Korean: Hello, how are you?";
-
-        String response = chatWithGPT(prompt, apiKey);
-        System.out.println("GPT Response: " + response);
     }
 }
