@@ -51,6 +51,7 @@ public class ChattingRoomPanel extends JPanel {
     private JPopupMenu emoticonPopup;
     // =======================
 
+    // 생성자 (채팅방 화면 초기화, 배피)
     public ChattingRoomPanel(MessengerFrame frame) {
         // GoogleTranslate 객체 초기화
         this.googleTranslate = new GoogleTranslate();
@@ -206,7 +207,7 @@ public class ChattingRoomPanel extends JPanel {
 
         // 언어 변경 버튼 붙이기
         languageButton.addActionListener(e -> {
-            languageMenu.show(languageButton, 0, languageButton.getHeight());
+            languageMenu.show(languageButton, 0, languageButton.getHeight()-207); // 채팅 하단 라인과 일치하도록 조정
         });
         leftIconsPanel.add(languageButton);
 
@@ -323,7 +324,7 @@ public class ChattingRoomPanel extends JPanel {
             }
         };
         messagePanel.setOpaque(false);
-        messagePanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+        messagePanel.setBorder(BorderFactory.createEmptyBorder(4, 5, 4, 5)); // 이모티콘일 경우 패딩 최소화
 
         JPanel textContainer = new JPanel();
         textContainer.setLayout(new BoxLayout(textContainer, BoxLayout.Y_AXIS));
@@ -400,9 +401,10 @@ public class ChattingRoomPanel extends JPanel {
             chatContainer.add(wrapper, 9);
         }
 
+        // 스크롤을 늘 최상단으로 이동
         SwingUtilities.invokeLater(() -> {
             JScrollBar vertical = scrollPane.getVerticalScrollBar();
-            vertical.setValue(vertical.getMaximum());
+            vertical.setValue(vertical.getMinimum());
         });
 
         chatContainer.revalidate();
