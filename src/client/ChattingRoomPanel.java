@@ -36,12 +36,12 @@ public class ChattingRoomPanel extends JPanel {
     private ImageIcon pictureImg   = new ImageIcon("src/assets/Picture.png");
     private ImageIcon robotImg     = new ImageIcon("src/assets/Robot.png");
     // 이모티콘 이미지
-    private ImageIcon CuriousEmoticonImg     = new ImageIcon("src/assets/Emoticon-Thumbs.png");
-    private ImageIcon EverythingEmoticonImg  = new ImageIcon("src/assets/Emoticon-Falling-In-Love.png");
-    private ImageIcon GreetEmoticonImg       = new ImageIcon("src/assets/Emoticon-Smile.png");
-    private ImageIcon ScheduleEmoticonImg    = new ImageIcon("src/assets/Emoticon-Funny-And-Sad.png");
-    private ImageIcon SecretEmoticonImg      = new ImageIcon("src/assets/Emoticon-Double-Hearts.png");
-    private ImageIcon TranslateEmoticonImg   = new ImageIcon("src/assets/Emoticon-Sad.png");
+    private ImageIcon ThumbsEmoticonImg = new ImageIcon("src/assets/Emoticon-Thumbs.png");
+    private ImageIcon FallingInLoveEmoticonImg = new ImageIcon("src/assets/Emoticon-Falling-In-Love.png");
+    private ImageIcon SmileEmoticonImg = new ImageIcon("src/assets/Emoticon-Smile.png");
+    private ImageIcon FunnyAndSadEmoticonImg = new ImageIcon("src/assets/Emoticon-Funny-And-Sad.png");
+    private ImageIcon DoubleHeartsEmoticonImg = new ImageIcon("src/assets/Emoticon-Double-Hearts.png");
+    private ImageIcon SadEmoticonImg = new ImageIcon("src/assets/Emoticon-Sad.png");
 
     // 전송 버튼
     private JButton sendButton;
@@ -196,14 +196,6 @@ public class ChattingRoomPanel extends JPanel {
         });
         languageMenu.add(menuItemZhCN);
 
-        // 중국어 번체 (zh-TW)
-        JMenuItem menuItemZhTW = new JMenuItem("중국어 번체(zh-T)");
-        menuItemZhTW.addActionListener(e -> {
-            this.targetLanguage = "zh-T";
-            System.out.println("[Client] 번역 언어 변경 -> zh-T");
-        });
-        languageMenu.add(menuItemZhTW);
-
         // 스페인어 (es)
         JMenuItem menuItemEs = new JMenuItem("스페인어(es)");
         menuItemEs.addActionListener(e -> {
@@ -211,6 +203,12 @@ public class ChattingRoomPanel extends JPanel {
             System.out.println("[Client] 번역 언어 변경 -> es");
         });
         languageMenu.add(menuItemEs);
+
+        // 언어 변경 버튼 붙이기
+        languageButton.addActionListener(e -> {
+            languageMenu.show(languageButton, 0, languageButton.getHeight());
+        });
+        leftIconsPanel.add(languageButton);
 
         // --- 이모티콘 버튼 ---
         JButton emoticonButton = new JButton(
@@ -457,12 +455,12 @@ public class ChattingRoomPanel extends JPanel {
         iconPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
         // 이모티콘(메뉴아이템)들을 iconPanel에 추가
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Thumbs.png", CuriousEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Falling-In-Love.png", EverythingEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Smile.png", GreetEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Funny-And-Sad.png", ScheduleEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Double-Hearts.png", SecretEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Sad.png", TranslateEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Thumbs.png", ThumbsEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Falling-In-Love.png", FallingInLoveEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Smile.png", SmileEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Funny-And-Sad.png", FunnyAndSadEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Double-Hearts.png", DoubleHeartsEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Sad.png", SadEmoticonImg));
 
         // JPopupMenu에 패널 직접 추가
         popup.add(iconPanel);
