@@ -41,13 +41,24 @@ public class ChattingRoomPanel extends JPanel {
         this.googleTranslate = new GoogleTranslate();
 
         setLayout(new BorderLayout());
-        setBackground(new Color(0xB9CEE0)); // 상단/중앙 부분 배경
+        setOpaque(false); // 패널을 투명하게 설정하여 paintComponent로 배경을 그리도록 설정
 
         // --------------------
         // 1) 상단 패널 (상대방 이름)
         // --------------------
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        topPanel.setBackground(new Color(0xD6E4F2));
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int width = getWidth();
+                int height = getHeight();
+                GradientPaint gp = new GradientPaint(0, 0, new Color(0xD6E4F2), 0, height, new Color(0xB9CEE0));
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, width, height);
+            }
+        };
+        topPanel.setOpaque(false);
         topPanel.setPreferredSize(new Dimension(0, 50)); // 높이 50
 
         currentUserLabel = new JLabel("채팅중인 상대 이름: " + targetName);
@@ -57,13 +68,26 @@ public class ChattingRoomPanel extends JPanel {
         // --------------------
         // 2) 중앙(채팅 메시지) 영역
         // --------------------
-        chatContainer = new JPanel();
+        chatContainer = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int width = getWidth();
+                int height = getHeight();
+                GradientPaint gp = new GradientPaint(0, 0, new Color(0xB9CEE0), 0, height, new Color(0xFFFFFF));
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, width, height);
+            }
+        };
         chatContainer.setLayout(new BoxLayout(chatContainer, BoxLayout.Y_AXIS));
-        chatContainer.setBackground(new Color(0xB9CEE0));
+        chatContainer.setOpaque(false);
         chatContainer.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // 좌우 여백
 
         scrollPane = new JScrollPane(chatContainer);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
 
         // --------------------
         // 3) 하단 영역 (흰색 배경, 2줄)

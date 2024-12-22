@@ -29,12 +29,12 @@ public class HomePanel extends JPanel {
         userMap.put("5", "양인서");
 
         // 이미지 아이콘 생성 및 크기 조정
-        ImageIcon profileImg = new ImageIcon("src/assets/profile.jpg");
+        ImageIcon profileImg = new ImageIcon("src/assets/profileImg.png");
         ImageIcon personImg = new ImageIcon("src/assets/Person.png");
         ImageIcon speechBubbleImg = new ImageIcon("src/assets/SpeechBubble.png");
         ImageIcon ellipsisImg = new ImageIcon("src/assets/Ellipsis.png");
 
-        Image scaledProfileImg = profileImg.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+        Image scaledProfileImg = profileImg.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
         Image scaledPersonImg = personImg.getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
         Image scaledSpeechBubbleImg = speechBubbleImg.getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
         Image scaledEllipsisImg = ellipsisImg.getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
@@ -44,9 +44,8 @@ public class HomePanel extends JPanel {
         JLabel ellipsisLabel = new JLabel(new ImageIcon(scaledEllipsisImg));
 
         // 기존 채팅방 리스트 패널 생성
-        chattingRoomListPanel = new JPanel();
+        chattingRoomListPanel = new GradientPanel();
         chattingRoomListPanel.setLayout(new BoxLayout(chattingRoomListPanel, BoxLayout.Y_AXIS)); // 수직 정렬
-        chattingRoomListPanel.setBackground(new Color(0xFFFFFF));
 
         // 기존 사용자 버튼 생성
         for (String userId : userMap.keySet()) {
@@ -104,5 +103,22 @@ public class HomePanel extends JPanel {
         add(menuPanel, BorderLayout.WEST); // 메뉴 패널은 왼쪽에 배치
         add(chattingRoomListPanel, BorderLayout.CENTER); // 기존 채팅방 리스트는 중앙에 배치
         add(additionalChattingRoomListPanel, BorderLayout.EAST); // 추가 채팅방 리스트는 오른쪽에 배치
+    }
+
+    // 커스텀 JPanel 클래스: 그라데이션 배경 지원
+    private static class GradientPanel extends JPanel {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+            int width = getWidth();
+            int height = getHeight();
+
+            // 그라데이션 색상 설정
+            GradientPaint gp = new GradientPaint(0, 0, new Color(0xC6DBE7), 0, height, new Color(0xFFFFFF));
+
+            g2d.setPaint(gp);
+            g2d.fillRect(0, 0, width, height);
+        }
     }
 }
