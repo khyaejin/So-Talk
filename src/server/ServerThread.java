@@ -32,34 +32,8 @@ public class ServerThread extends Thread {
                 String message = is.readUTF(); // 클라이언트로부터 메시지 읽기
                 System.out.println("[Server] 메시지 수신: " + message);
 
-                // 메세지 형식으로 구분(이래도 되나? 몰루 ㅠ)
-                // 클라이언트 ID 설정
-                if (message.startsWith("SET_ID:")) {
-                    this.userId = message.split(":")[1];
-                    clientsById.put(this.userId, this); // ID로 클라이언트를 저장
-                    System.out.println("[Server] 클라이언트 ID가 설정됨: " + this.userId);
-                } // 클라이언트 Name 설정
-                else if (message.startsWith("SET_NAME:")) {
-                    this.name = message.split(":")[1];
-                    System.out.println("[Server] 클라이언트 이름이 설정딤: " + this.name);
-                } // 채팅 상대 설정(채팅방 입장 시)
-                else if (message.startsWith("CHAT_WITH:")) {
-                    // 채팅 상대 설정
-                    this.chattingWith = message.split(":")[1];
-                    System.out.println("[Server] ID " + this.userId + "와 ID " + this.chattingWith + "의 채팅 시작");
-                } else if (message.startsWith("MESSAGE_TO_ID:")) {
-                    String[] parts = message.split(":", 3);
-                    if (parts.length == 3) {
-                        String targetId = parts[1];
-                        String chatMessage = parts[2];
-                        System.out.println("[Server] ID " + this.userId + "에서 ID " + targetId + "로 메시지 전달 요청: " + chatMessage);
-                        sendMessageToId(targetId, "MESSAGE_FROM:" + this.userId + ":" + chatMessage);
-                    } else {
-                        System.out.println("[Server] MESSAGE_TO_ID 명령의 형식이 잘못되었습니다: " + message);
-                    }
-                } else {
-                    System.out.println("[Server] 알 수 없는 명령어입니다: " + message);
-                }
+                // 메시지 처리
+                handleMessage(message);
             }
         } catch (IOException e) {
             System.out.println("[Server] 클라이언트 연결이 종료되었습니다: ID " + this.userId);
@@ -67,6 +41,81 @@ public class ServerThread extends Thread {
         } finally {
             cleanup();
         }
+    }
+
+    private void handleMessage(String message) throws IOException {
+        if (message.startsWith("SET_ID:")) {
+            synchronized (clientsById) {
+                this.userId = message.split(":")[1];
+                clientsById.put(this.userId, this); // ID로 클라이언트를 저장
+            }
+            System.out.println("[Server] 클라이언트 ID가 설정됨: " + this.userId);
+
+        } else if (message.startsWith("SET_NAME:")) {
+            this.name = message.split(":")[1];
+            System.out.println("[Server] 클라이언트 이름이 설정됨: " + this.name);
+
+        } else if (message.startsWith("CHAT_WITH:")) {
+            this.chattingWith = message.split(":")[1];
+            System.out.println("[Server] ID " + this.userId + "와 ID " + this.chattingWith + "의 채팅 시작");
+
+        } else if (message.startsWith("MESSAGE_TO_ID:")) {
+            handleTextMessage(message);
+
+        } else if (message.startsWith("EMOTICON_FILE:")) {
+            handleFileTransfer(message);
+
+        } else {
+            System.out.println("[Server] 알 수 없는 명령어입니다: " + message);
+        }
+    }
+
+    private void handleTextMessage(String message) {
+        String[] parts = message.split(":", 3);
+        if (parts.length == 3) {
+            String targetId = parts[1];
+            String chatMessage = parts[2];
+            System.out.println("[Server] ID " + this.userId + "에서 ID " + targetId + "로 메시지 전달 요청: " + chatMessage);
+            sendMessageToId(targetId, "MESSAGE_FROM:" + this.userId + ":" + chatMessage);
+        } else {
+            System.out.println("[Server] MESSAGE_TO_ID 명령의 형식이 잘못되었습니다: " + message);
+        }
+    }
+
+    private void handleFileTransfer(String message) throws IOException {
+        String[] parts = message.split(":", 4);
+        if (parts.length < 4) {
+            System.out.println("[Server] EMOTICON_FILE 명령의 형식이 잘못되었습니다: " + message);
+            return;
+        }
+
+        String targetId = parts[1];
+        String fileName = parts[2];
+        long fileSize = Long.parseLong(parts[3]);
+
+        System.out.println("[Server] 파일 전송 요청: ID " + this.userId + " -> ID " + targetId + ", 파일명: " + fileName + ", 크기: " + fileSize);
+
+        // 파일 데이터 읽기
+        byte[] fileData = new byte[(int) fileSize];
+        int totalBytesRead = 0;
+
+        while (totalBytesRead < fileSize) {
+            int bytesRead = is.read(fileData, totalBytesRead, (int) fileSize - totalBytesRead);
+            if (bytesRead == -1) {
+                System.out.println("[Server] 파일 데이터 수신 중 연결이 끊어졌습니다.");
+                return;
+            }
+            totalBytesRead += bytesRead;
+        }
+        if (totalBytesRead != fileSize) {
+            System.out.println("[Server] 파일 데이터 수신 중 크기 불일치: 수신 = " + totalBytesRead + ", 예상 = " + fileSize);
+            sendMessageToId(targetId, "ERROR: 파일 수신 크기가 불일치합니다. 전송 실패");
+            return;
+        }
+
+
+        // 대상 클라이언트로 파일 데이터 전송
+        sendFileToId(targetId, fileName, fileSize, fileData);
     }
 
     private void sendMessageToId(String targetId, String message) {
@@ -82,6 +131,31 @@ public class ServerThread extends Thread {
             System.out.println("[Server] ID " + targetId + " 클라이언트가 비활성 상태이거나 존재하지 않습니다.");
         }
     }
+
+    private void sendFileToId(String targetId, String fileName, long fileSize, byte[] fileData) {
+        ServerThread targetClient = clientsById.get(targetId);
+        if (targetClient != null && targetClient.active) {
+            try {
+                System.out.println("[Server] ID " + targetId + "에게 파일을 전송합니다: " + fileName + " (" + fileSize + " bytes)");
+
+                // 헤더 전송
+                targetClient.os.writeUTF("EMOTICON_FILE:" + this.userId + ":" + fileName + ":" + fileSize);
+                // 파일 데이터 전송
+                targetClient.os.write(fileData);
+                targetClient.os.flush();
+
+                // 파일 전송 완료 알림
+                sendMessageToId(this.userId, "파일 전송 완료: " + fileName);
+                System.out.println("[Server] 파일 전송 완료: " + fileName);
+            } catch (IOException e) {
+                System.out.println("[Server] ID " + targetId + "로 파일 전송 중 오류가 발생했습니다.");
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("[Server] ID " + targetId + " 클라이언트가 비활성 상태이거나 존재하지 않습니다.");
+        }
+    }
+
     private void cleanup() {
         try {
             if (userId != null) {

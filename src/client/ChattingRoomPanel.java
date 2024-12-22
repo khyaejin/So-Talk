@@ -7,6 +7,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -26,15 +28,30 @@ public class ChattingRoomPanel extends JPanel {
     private GoogleTranslate googleTranslate;
     private String targetLanguage = "ko";   // 기본 번역 언어: "ko" (한국어)
 
-    // 이미지 리소스 (경로는 필요시 환경에 맞게 수정)
+    // ---- 이미지들 ----
+    // 버튼 이미지
     private ImageIcon translateImg = new ImageIcon("src/assets/Translate.png");
     private ImageIcon languageImg  = new ImageIcon("src/assets/Language.png");
     private ImageIcon emoticonImg  = new ImageIcon("src/assets/Emoticon.png");
     private ImageIcon pictureImg   = new ImageIcon("src/assets/Picture.png");
     private ImageIcon robotImg     = new ImageIcon("src/assets/Robot.png");
+    // 이모티콘 이미지
+    private ImageIcon CuriousEmoticonImg     = new ImageIcon("src/assets/Emoticon-Curious.png");
+    private ImageIcon EverythingEmoticonImg  = new ImageIcon("src/assets/Emoticon-Everything.png");
+    private ImageIcon GreetEmoticonImg       = new ImageIcon("src/assets/Emoticon-Greet.png");
+    private ImageIcon ScheduleEmoticonImg    = new ImageIcon("src/assets/Emoticon-Schedule.png");
+    private ImageIcon SecretEmoticonImg      = new ImageIcon("src/assets/Emoticon-Secret.png");
+    private ImageIcon TranslateEmoticonImg   = new ImageIcon("src/assets/Emoticon-Translate.png");
 
     // 전송 버튼
     private JButton sendButton;
+
+    // =======================
+    // === [버전2 추가] ===
+    // 이모티콘 팝업
+    private JPopupMenu emoticonPopup;
+    // === [버전2 추가] 끝
+    // =======================
 
     public ChattingRoomPanel(MessengerFrame frame) {
         // GoogleTranslate 객체 초기화
@@ -169,9 +186,16 @@ public class ChattingRoomPanel extends JPanel {
                 new ImageIcon(emoticonImg.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))
         );
         styleIconButton(emoticonButton);
+        // =======================
+        // === [버전2 추가] ===
         emoticonButton.addActionListener(e -> {
-            System.out.println("[Client] 이모티콘 버튼 클릭");
+            if (emoticonPopup == null) {
+                emoticonPopup = createEmoticonPopup();
+            }
+            emoticonPopup.show(emoticonButton, 0, emoticonButton.getHeight());
         });
+        // === [버전2 추가] 끝
+        // =======================
         leftIconsPanel.add(emoticonButton);
 
         // --- 사진 버튼 ---
@@ -267,10 +291,6 @@ public class ChattingRoomPanel extends JPanel {
             chatContainer.setLayout(new GridLayout(10, 1, 0, 9));
         }
 
-        // (2) 말풍선 패널 생성
-        // 기존: 메시지 하나당 wrapper + messagePanel + (번역버튼)
-        // → 번역 결과를 같은 말풍선 아래줄에 표시하기 위해
-        //    'textContainer' 라는 서브 패널(BoxLayout) 추가
         JPanel messagePanel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -284,21 +304,17 @@ public class ChattingRoomPanel extends JPanel {
         messagePanel.setOpaque(false);
         messagePanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
 
-        // 말풍선 내부에 여러 줄(원본 + 번역결과 등)을 담을 서브패널
         JPanel textContainer = new JPanel();
         textContainer.setLayout(new BoxLayout(textContainer, BoxLayout.Y_AXIS));
         textContainer.setOpaque(false);
 
-        // 원본 메시지 라벨
         JLabel messageLabel = new JLabel("<html>" + message.replaceAll("\n", "<br>") + "</html>");
         messageLabel.setForeground(Color.BLACK);
         messageLabel.setMaximumSize(new Dimension(300, Integer.MAX_VALUE));
         textContainer.add(messageLabel);
 
-        // 말풍선 내부에 textContainer 배치
         messagePanel.add(textContainer, BorderLayout.CENTER);
 
-        // 번역 버튼 (말풍선 오른쪽)
         JButton translateButton = new JButton(
                 new ImageIcon(translateImg.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))
         );
@@ -307,31 +323,26 @@ public class ChattingRoomPanel extends JPanel {
         translateButton.setBorderPainted(false);
         translateButton.setFocusPainted(false);
 
-        // (2) 번역 버튼 클릭 -> 번역 텍스트를 "같은 말풍선 아래줄"에 추가
         translateButton.addActionListener(e -> {
             try {
                 String translatedText = googleTranslate.translate(message, targetLanguage);
                 System.out.println("[Client] 번역 결과 (" + targetLanguage + "): " + translatedText);
 
-                // 새 라벨을 만들어, 같은 말풍선의 textContainer 아래에 추가
                 JLabel translationLabel = new JLabel("<html>"
                         + translatedText.replaceAll("\n", "<br>")
                         + "</html>");
-                translationLabel.setForeground(Color.GRAY);  // 예: 회색으로 표시
-                // 살짝 위쪽 여백 주기
+                translationLabel.setForeground(Color.GRAY);
                 translationLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 0, 0));
 
                 textContainer.add(translationLabel);
                 textContainer.revalidate();
                 textContainer.repaint();
-
             } catch (Exception ex) {
                 System.out.println("[Client] 번역 중 오류 발생: " + ex.getMessage());
                 ex.printStackTrace();
             }
         });
 
-        // wrapper: 번역 버튼 + 말풍선 패널
         JPanel wrapper = new JPanel(new FlowLayout(isMyMessage ? FlowLayout.RIGHT : FlowLayout.LEFT, 5, 0));
         wrapper.setOpaque(false);
 
@@ -343,7 +354,6 @@ public class ChattingRoomPanel extends JPanel {
             wrapper.add(translateButton);
         }
 
-        // 채팅창 10개 유지 로직
         int currentComponentCount = chatContainer.getComponentCount();
         if (currentComponentCount < 10) {
             chatContainer.add(wrapper, currentComponentCount);
@@ -352,7 +362,6 @@ public class ChattingRoomPanel extends JPanel {
             chatContainer.add(wrapper, 9);
         }
 
-        // 스크롤을 항상 최하단
         SwingUtilities.invokeLater(() -> {
             JScrollBar vertical = scrollPane.getVerticalScrollBar();
             vertical.setValue(vertical.getMaximum());
@@ -387,6 +396,103 @@ public class ChattingRoomPanel extends JPanel {
         } catch (IOException e) {
             System.out.println("[Client] 메시지를 전송하는 중 오류가 발생했습니다.");
             e.printStackTrace();
+        }
+    }
+
+    // =======================
+    /**
+     * 이모티콘 목록 팝업 생성
+     */
+    private JPopupMenu createEmoticonPopup() {
+        // 원본 JPopupMenu
+        JPopupMenu popup = new JPopupMenu();
+
+        // 스크롤 가능한 패널을 만들기 위해, 먼저 JPanel 혹은 Box 생성
+        JPanel iconPanel = new JPanel();
+        iconPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        // iconPanel.setPreferredSize(new Dimension(200, 9999));
+        // ↑ 세로 길이를 크게 해두고, 스크롤이 생길 수 있도록 하는 팁(필요하다면)
+
+        // 이모티콘(메뉴아이템)들을 iconPanel에 추가
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Curious.png", CuriousEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Everything.png", EverythingEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Greet.png", GreetEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Schedule.png", ScheduleEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Secret.png", SecretEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Translate.png", TranslateEmoticonImg));
+
+        // 이제 이 iconPanel을 JScrollPane로 감싸고, 높이 제한
+        JScrollPane scrollPane = new JScrollPane(iconPanel);
+        scrollPane.setPreferredSize(new Dimension(200, 50)); // 최대 높이 50px
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        // 그리고 JPopupMenu에 scrollPane을 붙인다
+        popup.add(scrollPane);
+
+        return popup;
+    }
+
+    /**
+     * 이모티콘 메뉴아이템 생성
+     */
+    private JButton createEmoticonMenuItem(String filePath, ImageIcon icon) {
+        // 기존 icon 이미지를 축소
+        Image scaledImg = icon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        ImageIcon resizedIcon = new ImageIcon(scaledImg);
+
+        // JButton을 사용하여 아이콘 버튼 생성
+        JButton button = new JButton(resizedIcon);
+        button.setPreferredSize(new Dimension(40, 40)); // 버튼 크기 설정
+        button.setContentAreaFilled(false); // 버튼 투명하게
+        button.setBorderPainted(false); // 테두리 없애기
+        button.setFocusPainted(false);
+
+        // 툴팁으로 파일 경로를 보여줌
+        button.setToolTipText(filePath);
+
+        // 버튼 클릭 시 이모티콘 파일 전송
+        button.addActionListener(e -> sendEmoticonImage(filePath));
+
+        return button;
+    }
+
+
+    /**
+     * (버전2) 이미지 파일 자체를 소켓으로 전송
+     * 서버는 파일 크기와 바이트 배열을 수신 후,
+     * 동일하게 다른 클라이언트에게 파일을 중계하도록 구현해야 함.
+     */
+    private void sendEmoticonImage(String filePath) {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            System.out.println("[Client] 파일이 존재하지 않습니다: " + filePath);
+            return;
+        }
+
+        try (FileInputStream fis = new FileInputStream(file)) {
+            long fileSize = file.length();
+            byte[] buffer = new byte[(int) fileSize];
+            int readBytes = fis.read(buffer);
+
+            // 1) 채팅창에 표시(보낸 사람이 보는 미리보기)
+            updateChattingText("Me", "[이모티콘 전송] " + file.getName(), true);
+
+            // 2) 서버로 전송: 헤더 + 파일 바이트
+            if (targetId != null) {
+                // 예: "EMOTICON_FILE"라는 키워드로 프로토콜을 구분
+                //     이후에 파일 크기와 파일명, 실제 데이터를 순차적으로 write
+                outputStream.writeUTF("EMOTICON_FILE:" + targetId + ":" + file.getName() + ":" + fileSize);
+                outputStream.write(buffer, 0, readBytes);
+                outputStream.flush();
+
+                System.out.println("[Client] 이모티콘 파일 전송 완료: " + filePath);
+            } else {
+                System.out.println("[Client] 대상 ID가 설정되지 않았습니다. 이모티콘을 전송할 수 없습니다.");
+            }
+        } catch (IOException ex) {
+            System.out.println("[Client] 이모티콘 파일 전송 중 오류 발생.");
+            ex.printStackTrace();
         }
     }
 }
