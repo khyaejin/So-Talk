@@ -130,7 +130,7 @@ public class ChattingRoomPanel extends JPanel {
         translateButton.addActionListener(e -> {
             try {
                 // Google Translate API를 통해 번역
-                String translatedText = googleTranslate.translate(message, "en"); // 번역할 텍스트와 대상 언어 지정
+                String translatedText = googleTranslate.translate(message, "ko"); // 번역할 텍스트와 대상 언어 지정
                 System.out.println("[Client] 번역 결과: " + translatedText);
 
                 // 번역 결과를 별도의 말풍선으로 추가
