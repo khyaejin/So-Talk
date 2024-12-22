@@ -36,12 +36,12 @@ public class ChattingRoomPanel extends JPanel {
     private ImageIcon pictureImg   = new ImageIcon("src/assets/Picture.png");
     private ImageIcon robotImg     = new ImageIcon("src/assets/Robot.png");
     // 이모티콘 이미지
-    private ImageIcon CuriousEmoticonImg     = new ImageIcon("src/assets/Emoticon-Curious.png");
-    private ImageIcon EverythingEmoticonImg  = new ImageIcon("src/assets/Emoticon-Everything.png");
-    private ImageIcon GreetEmoticonImg       = new ImageIcon("src/assets/Emoticon-Greet.png");
-    private ImageIcon ScheduleEmoticonImg    = new ImageIcon("src/assets/Emoticon-Schedule.png");
-    private ImageIcon SecretEmoticonImg      = new ImageIcon("src/assets/Emoticon-Secret.png");
-    private ImageIcon TranslateEmoticonImg   = new ImageIcon("src/assets/Emoticon-Translate.png");
+    private ImageIcon CuriousEmoticonImg     = new ImageIcon("src/assets/Emoticon-Thumbs.png");
+    private ImageIcon EverythingEmoticonImg  = new ImageIcon("src/assets/Emoticon-Falling-In-Love.png");
+    private ImageIcon GreetEmoticonImg       = new ImageIcon("src/assets/Emoticon-Smile.png");
+    private ImageIcon ScheduleEmoticonImg    = new ImageIcon("src/assets/Emoticon-Funny-And-Sad.png");
+    private ImageIcon SecretEmoticonImg      = new ImageIcon("src/assets/Emoticon-Double-Hearts.png");
+    private ImageIcon TranslateEmoticonImg   = new ImageIcon("src/assets/Emoticon-Sad.png");
 
     // 전송 버튼
     private JButton sendButton;
@@ -187,14 +187,12 @@ public class ChattingRoomPanel extends JPanel {
         );
         styleIconButton(emoticonButton);
         // =======================
-        // === [버전2 추가] ===
         emoticonButton.addActionListener(e -> {
             if (emoticonPopup == null) {
                 emoticonPopup = createEmoticonPopup();
             }
             emoticonPopup.show(emoticonButton, 0, emoticonButton.getHeight());
         });
-        // === [버전2 추가] 끝
         // =======================
         leftIconsPanel.add(emoticonButton);
 
@@ -265,11 +263,6 @@ public class ChattingRoomPanel extends JPanel {
         }
     }
 
-    // 현재 로그인한 사용자 이름 설정
-    public void setCurrentUserName(String userName) {
-        currentUserLabel.setText("로그인한 사용자: " + userName);
-    }
-
     public void setOutputStream(DataOutputStream os) {
         this.outputStream = os;
     }
@@ -309,9 +302,15 @@ public class ChattingRoomPanel extends JPanel {
 
         // 이미지가 있는 경우 처리
         if (imageIcon != null) {
-            JLabel imageLabel = new JLabel(imageIcon);
+            // 이모티콘 크기 조정 (예: 50x50)
+            Image scaledImage = imageIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            ImageIcon resizedIcon = new ImageIcon(scaledImage);
+
+            // 조정된 이미지를 JLabel에 추가
+            JLabel imageLabel = new JLabel(resizedIcon);
             textContainer.add(imageLabel);
         }
+
 
         // 텍스트 메시지 처리
         if (message != null && !message.isEmpty()) {
@@ -429,16 +428,16 @@ public class ChattingRoomPanel extends JPanel {
         // ↑ 세로 길이를 크게 해두고, 스크롤이 생길 수 있도록 하는 팁(필요하다면)
 
         // 이모티콘(메뉴아이템)들을 iconPanel에 추가
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Curious.png", CuriousEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Everything.png", EverythingEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Greet.png", GreetEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Schedule.png", ScheduleEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Secret.png", SecretEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Translate.png", TranslateEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Thumbs.png", CuriousEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Falling-In-Love.png", EverythingEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Smile.png", GreetEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Funny-And-Sad.png", ScheduleEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Double-Hearts.png", SecretEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Sad.png", TranslateEmoticonImg));
 
         // 이제 이 iconPanel을 JScrollPane로 감싸고, 높이 제한
         JScrollPane scrollPane = new JScrollPane(iconPanel);
-        scrollPane.setPreferredSize(new Dimension(200, 50)); // 최대 높이 50px
+        scrollPane.setPreferredSize(new Dimension(300, 50)); // 최대 높이 50px
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
@@ -447,16 +446,25 @@ public class ChattingRoomPanel extends JPanel {
 
         return popup;
     }
-    public void receiveEmoticon(String sender, String filePath) {
-        File file = new File(filePath);
-        if (file.exists()) {
-            ImageIcon receivedIcon = new ImageIcon(filePath);
-            // 이미지 메시지로 표시
-            updateChattingText(sender, null, false, receivedIcon);
-        } else {
-            System.out.println("[Client] 수신한 파일이 존재하지 않습니다: " + filePath);
+    public void receiveEmoticon(String sender, byte[] imageData) {
+        try {
+            // 바이트 배열을 ImageIcon으로 변환
+            ImageIcon receivedIcon = new ImageIcon(imageData);
+
+            // 이모티콘 크기 조정 (예: 50x50)
+            Image scaledImage = receivedIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            ImageIcon resizedIcon = new ImageIcon(scaledImage);
+
+            // 채팅창에 이미지 표시
+            updateChattingText(sender, null, false, resizedIcon);
+
+            System.out.println("[Client] 이모티콘 수신 완료.");
+        } catch (Exception e) {
+            System.out.println("[Client] 이모티콘 처리 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
 
     /**
      * 이모티콘 메뉴아이템 생성
