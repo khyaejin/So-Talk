@@ -47,10 +47,8 @@ public class ChattingRoomPanel extends JPanel {
     private JButton sendButton;
 
     // =======================
-    // === [버전2 추가] ===
     // 이모티콘 팝업
     private JPopupMenu emoticonPopup;
-    // === [버전2 추가] 끝
     // =======================
 
     public ChattingRoomPanel(MessengerFrame frame) {
@@ -121,7 +119,7 @@ public class ChattingRoomPanel extends JPanel {
         messageInputField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         messageInputField.setFont(new Font("Arial", Font.PLAIN, 14));
 
-        // 입력창 내용 변화 -> 전송 버튼 색상 변경
+        // 입력창 내용 변화 -> 전송 버튼 색상 변경 -> 안 됨.. 왜!!!!!
         messageInputField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) { updateSendButtonColor(); }
@@ -174,12 +172,45 @@ public class ChattingRoomPanel extends JPanel {
         });
         languageMenu.add(menuItemJa);
 
-        // 필요하다면 다른 언어도 추가
-
-        languageButton.addActionListener(e -> {
-            languageMenu.show(languageButton, 0, languageButton.getHeight()-131); // 채팅방 하단 라인에 맞도록 y축 조정
+        // 독일어 (de)
+        JMenuItem menuItemDe = new JMenuItem("독일어(de)");
+        menuItemDe.addActionListener(e -> {
+            this.targetLanguage = "de";
+            System.out.println("[Client] 번역 언어 변경 -> de");
         });
-        leftIconsPanel.add(languageButton);
+        languageMenu.add(menuItemDe);
+
+        // 이탈리아어 (it)
+        JMenuItem menuItemIt = new JMenuItem("이탈리아어(it)");
+        menuItemIt.addActionListener(e -> {
+            this.targetLanguage = "it";
+            System.out.println("[Client] 번역 언어 변경 -> it");
+        });
+        languageMenu.add(menuItemIt);
+
+        // 중국어 간체 (zh-CN)
+        JMenuItem menuItemZhCN = new JMenuItem("중국어 간체(zh-CN)");
+        menuItemZhCN.addActionListener(e -> {
+            this.targetLanguage = "zh-CN";
+            System.out.println("[Client] 번역 언어 변경 -> zh-CN");
+        });
+        languageMenu.add(menuItemZhCN);
+
+        // 중국어 번체 (zh-TW)
+        JMenuItem menuItemZhTW = new JMenuItem("중국어 번체(zh-T)");
+        menuItemZhTW.addActionListener(e -> {
+            this.targetLanguage = "zh-T";
+            System.out.println("[Client] 번역 언어 변경 -> zh-T");
+        });
+        languageMenu.add(menuItemZhTW);
+
+        // 스페인어 (es)
+        JMenuItem menuItemEs = new JMenuItem("스페인어(es)");
+        menuItemEs.addActionListener(e -> {
+            this.targetLanguage = "es";
+            System.out.println("[Client] 번역 언어 변경 -> es");
+        });
+        languageMenu.add(menuItemEs);
 
         // --- 이모티콘 버튼 ---
         JButton emoticonButton = new JButton(
