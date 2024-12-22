@@ -36,15 +36,14 @@ public class MessengerApp {
                     String message = inputStream.readUTF();
                     System.out.println("[Client] 메시지 수신: " + message);
 
-                    // 메시지가 수신되면 ChattingRoomPanel에 업데이트
-                    if (message.startsWith("MESSAGE_FROM:")) {
-                        String[] parts = message.split(":", 3);
-                        String senderId = parts[1];
-                        String chatMessage = parts[2];
-
-                        // 상대방의 메시지를 채팅방에 업데이트
-                        frame.getChattingRoomPanel().updateChattingText("ID " + senderId, chatMessage, false);
-                        System.out.println("[Client] ID " + senderId + "로부터 메시지 수신: " + chatMessage);
+                    if (message.startsWith("EMOTICON_FILE:")) {
+                        // 이미지 파일 처리
+                        handleEmoticonFile(message);
+                    } else if (message.startsWith("MESSAGE_FROM:")) {
+                        // 일반 메시지 처리
+                        handleTextMessage(message);
+                    } else {
+                        System.out.println("[Client] 알 수 없는 메시지 유형: " + message);
                     }
                 } catch (IOException e) {
                     System.out.println("[Client] 서버와의 연결이 끊어졌습니다.");
@@ -53,5 +52,42 @@ public class MessengerApp {
                 }
             }
         }).start();
+    }
+
+    /**
+     * 이미지 파일 처리
+     */
+    private void handleEmoticonFile(String message) {
+        try {
+            String[] parts = message.split(":");
+            String sender = parts[1];
+            String fileName = parts[2];
+            long fileSize = Long.parseLong(parts[3]);
+
+            // 이미지 데이터 읽기
+            byte[] buffer = new byte[(int) fileSize];
+            inputStream.readFully(buffer);
+
+            // ChattingRoomPanel에 이미지 업데이트
+            frame.getChattingRoomPanel().receiveEmoticon(sender, buffer);
+            System.out.println("[Client] ID " + sender + "로부터 이미지 수신: " + fileName);
+
+        } catch (IOException e) {
+            System.out.println("[Client] 이모티콘 파일 처리 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 텍스트 메시지 처리
+     */
+    private void handleTextMessage(String message) {
+        String[] parts = message.split(":", 3);
+        String senderId = parts[1];
+        String chatMessage = parts[2];
+
+        // ChattingRoomPanel에 텍스트 메시지 업데이트
+        frame.getChattingRoomPanel().updateChattingText(senderId, chatMessage, false, null);
+        System.out.println("[Client] ID " + senderId + "로부터 메시지 수신: " + chatMessage);
     }
 }

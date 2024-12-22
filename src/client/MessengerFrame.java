@@ -77,7 +77,7 @@ public class MessengerFrame extends JFrame {
 
     // 채팅 메시지 업데이트
     public void updateChattingRoomText(String sender, String message, boolean isMyMessage) {
-        chattingRoomPanel.updateChattingText(sender, message, isMyMessage);
+        chattingRoomPanel.updateChattingText(sender, message, isMyMessage, null);
     }
 
     // 시작 화면 표시

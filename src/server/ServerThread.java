@@ -93,6 +93,14 @@ public class ServerThread extends Thread {
         String fileName = parts[2];
         long fileSize = Long.parseLong(parts[3]);
 
+        // 파일 크기 제한 (예: 5MB)
+        final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        if (fileSize > MAX_FILE_SIZE) {
+            System.out.println("[Server] 파일 크기가 너무 큽니다: " + fileSize + " bytes");
+            sendMessageToId(this.userId, "ERROR: 파일 크기가 서버 제한(5MB)을 초과했습니다. 전송 실패");
+            return;
+        }
+
         System.out.println("[Server] 파일 전송 요청: ID " + this.userId + " -> ID " + targetId + ", 파일명: " + fileName + ", 크기: " + fileSize);
 
         // 파일 데이터 읽기
@@ -103,33 +111,21 @@ public class ServerThread extends Thread {
             int bytesRead = is.read(fileData, totalBytesRead, (int) fileSize - totalBytesRead);
             if (bytesRead == -1) {
                 System.out.println("[Server] 파일 데이터 수신 중 연결이 끊어졌습니다.");
+                sendMessageToId(this.userId, "ERROR: 파일 데이터 수신 중 연결이 끊어졌습니다.");
                 return;
             }
             totalBytesRead += bytesRead;
         }
+
+        // 데이터 크기 불일치 확인
         if (totalBytesRead != fileSize) {
             System.out.println("[Server] 파일 데이터 수신 중 크기 불일치: 수신 = " + totalBytesRead + ", 예상 = " + fileSize);
-            sendMessageToId(targetId, "ERROR: 파일 수신 크기가 불일치합니다. 전송 실패");
+            sendMessageToId(this.userId, "ERROR: 파일 크기 불일치로 전송 실패");
             return;
         }
 
-
         // 대상 클라이언트로 파일 데이터 전송
         sendFileToId(targetId, fileName, fileSize, fileData);
-    }
-
-    private void sendMessageToId(String targetId, String message) {
-        ServerThread targetClient = clientsById.get(targetId);
-        if (targetClient != null && targetClient.active) {
-            try {
-                System.out.println("[Server] ID " + targetId + "에게 메시지를 전송합니다: " + message);
-                targetClient.os.writeUTF(message); // 대상 클라이언트에 메시지 전송
-            } catch (IOException e) {
-                System.out.println("[Server] ID " + targetId + "로 메시지를 전송하는 중 오류가 발생했습니다.");
-            }
-        } else {
-            System.out.println("[Server] ID " + targetId + " 클라이언트가 비활성 상태이거나 존재하지 않습니다.");
-        }
     }
 
     private void sendFileToId(String targetId, String fileName, long fileSize, byte[] fileData) {
@@ -144,12 +140,28 @@ public class ServerThread extends Thread {
                 targetClient.os.write(fileData);
                 targetClient.os.flush();
 
-                // 파일 전송 완료 알림
+                // 전송 완료 메시지
                 sendMessageToId(this.userId, "파일 전송 완료: " + fileName);
                 System.out.println("[Server] 파일 전송 완료: " + fileName);
             } catch (IOException e) {
                 System.out.println("[Server] ID " + targetId + "로 파일 전송 중 오류가 발생했습니다.");
                 e.printStackTrace();
+                sendMessageToId(this.userId, "ERROR: 파일 전송 중 오류가 발생했습니다.");
+            }
+        } else {
+            System.out.println("[Server] ID " + targetId + " 클라이언트가 비활성 상태이거나 존재하지 않습니다.");
+            sendMessageToId(this.userId, "ERROR: 대상 클라이언트가 비활성 상태이거나 존재하지 않습니다.");
+        }
+    }
+
+    private void sendMessageToId(String targetId, String message) {
+        ServerThread targetClient = clientsById.get(targetId);
+        if (targetClient != null && targetClient.active) {
+            try {
+                System.out.println("[Server] ID " + targetId + "에게 메시지를 전송합니다: " + message);
+                targetClient.os.writeUTF(message); // 대상 클라이언트에 메시지 전송
+            } catch (IOException e) {
+                System.out.println("[Server] ID " + targetId + "로 메시지를 전송하는 중 오류가 발생했습니다.");
             }
         } else {
             System.out.println("[Server] ID " + targetId + " 클라이언트가 비활성 상태이거나 존재하지 않습니다.");
