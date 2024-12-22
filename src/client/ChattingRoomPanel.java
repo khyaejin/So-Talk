@@ -285,12 +285,11 @@ public class ChattingRoomPanel extends JPanel {
     }
 
     // 채팅 메시지를 화면에 추가
-    public void updateChattingText(String sender, String message, boolean isMyMessage) {
+    public void updateChattingText(String sender, String message, boolean isMyMessage, ImageIcon imageIcon) {
         // 메시지가 10개 초과 시 오래된 것 제거 (기존 로직 유지)
         if (!(chatContainer.getLayout() instanceof GridLayout)) {
             chatContainer.setLayout(new GridLayout(10, 1, 0, 9));
         }
-
         JPanel messagePanel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -308,11 +307,19 @@ public class ChattingRoomPanel extends JPanel {
         textContainer.setLayout(new BoxLayout(textContainer, BoxLayout.Y_AXIS));
         textContainer.setOpaque(false);
 
-        JLabel messageLabel = new JLabel("<html>" + message.replaceAll("\n", "<br>") + "</html>");
-        messageLabel.setForeground(Color.BLACK);
-        messageLabel.setMaximumSize(new Dimension(300, Integer.MAX_VALUE));
-        textContainer.add(messageLabel);
+        // 이미지가 있는 경우 처리
+        if (imageIcon != null) {
+            JLabel imageLabel = new JLabel(imageIcon);
+            textContainer.add(imageLabel);
+        }
 
+        // 텍스트 메시지 처리
+        if (message != null && !message.isEmpty()) {
+            JLabel messageLabel = new JLabel("<html>" + message.replaceAll("\n", "<br>") + "</html>");
+            messageLabel.setForeground(Color.BLACK);
+            messageLabel.setMaximumSize(new Dimension(300, Integer.MAX_VALUE));
+            textContainer.add(messageLabel);
+        }
         messagePanel.add(textContainer, BorderLayout.CENTER);
 
         JButton translateButton = new JButton(
@@ -379,22 +386,30 @@ public class ChattingRoomPanel extends JPanel {
             return;
         }
 
+        // outputStream 초기화 여부 확인
+        if (outputStream == null) {
+            System.out.println("[Client] 서버와의 연결이 설정되지 않았습니다. 메시지를 전송할 수 없습니다.");
+            return;
+        }
+
+        // targetId 설정 여부 확인
+        if (targetId == null || targetId.isEmpty()) {
+            System.out.println("[Client] 대상 ID가 설정되지 않았습니다. 메시지를 전송할 수 없습니다.");
+            return;
+        }
+
         try {
-            // 내 메시지 UI 업데이트
-            updateChattingText("Me", message, true);
+            // UI 업데이트
+            updateChattingText("Me", message, true, null);
 
             // 서버로 메시지 전송
-            if (targetId != null) {
-                System.out.println("[Client] 메시지 전송: 대상 ID = " + targetId + ", 메시지 = " + message);
-                outputStream.writeUTF("MESSAGE_TO_ID:" + targetId + ":" + message);
-            } else {
-                System.out.println("[Client] 대상 ID가 설정되지 않았습니다. 메시지를 전송할 수 없습니다.");
-            }
+            System.out.println("[Client] 메시지 전송: 대상 ID = " + targetId + ", 메시지 = " + message);
+            outputStream.writeUTF("MESSAGE_TO_ID:" + targetId + ":" + message);
 
             // 입력 필드 초기화
             messageInputField.setText("");
         } catch (IOException e) {
-            System.out.println("[Client] 메시지를 전송하는 중 오류가 발생했습니다.");
+            System.out.println("[Client] 메시지를 전송하는 중 오류가 발생했습니다: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -431,6 +446,16 @@ public class ChattingRoomPanel extends JPanel {
         popup.add(scrollPane);
 
         return popup;
+    }
+    public void receiveEmoticon(String sender, String filePath) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            ImageIcon receivedIcon = new ImageIcon(filePath);
+            // 이미지 메시지로 표시
+            updateChattingText(sender, null, false, receivedIcon);
+        } else {
+            System.out.println("[Client] 수신한 파일이 존재하지 않습니다: " + filePath);
+        }
     }
 
     /**
@@ -475,13 +500,13 @@ public class ChattingRoomPanel extends JPanel {
             byte[] buffer = new byte[(int) fileSize];
             int readBytes = fis.read(buffer);
 
-            // 1) 채팅창에 표시(보낸 사람이 보는 미리보기)
-            updateChattingText("Me", "[이모티콘 전송] " + file.getName(), true);
+            ImageIcon emoticonIcon = new ImageIcon(filePath);
 
-            // 2) 서버로 전송: 헤더 + 파일 바이트
+            // 1) 채팅창에 이미지 표시
+            updateChattingText("Me", null, true, emoticonIcon);
+
+            // 2) 서버로 파일 전송
             if (targetId != null) {
-                // 예: "EMOTICON_FILE"라는 키워드로 프로토콜을 구분
-                //     이후에 파일 크기와 파일명, 실제 데이터를 순차적으로 write
                 outputStream.writeUTF("EMOTICON_FILE:" + targetId + ":" + file.getName() + ":" + fileSize);
                 outputStream.write(buffer, 0, readBytes);
                 outputStream.flush();

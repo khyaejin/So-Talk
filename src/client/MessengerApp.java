@@ -43,7 +43,7 @@ public class MessengerApp {
                         String chatMessage = parts[2];
 
                         // 상대방의 메시지를 채팅방에 업데이트
-                        frame.getChattingRoomPanel().updateChattingText("ID " + senderId, chatMessage, false);
+                        frame.getChattingRoomPanel().updateChattingText("ID " + senderId, chatMessage, false, null);
                         System.out.println("[Client] ID " + senderId + "로부터 메시지 수신: " + chatMessage);
                     }
                 } catch (IOException e) {
