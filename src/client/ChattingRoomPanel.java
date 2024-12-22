@@ -324,7 +324,7 @@ public class ChattingRoomPanel extends JPanel {
             }
         };
         messagePanel.setOpaque(false);
-        messagePanel.setBorder(BorderFactory.createEmptyBorder(4, 5, 4, 5)); // 이모티콘일 경우 패딩 최소화
+        messagePanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
 
         JPanel textContainer = new JPanel();
         textContainer.setLayout(new BoxLayout(textContainer, BoxLayout.Y_AXIS));
@@ -354,7 +354,7 @@ public class ChattingRoomPanel extends JPanel {
         JPanel wrapper = new JPanel(new FlowLayout(isMyMessage ? FlowLayout.RIGHT : FlowLayout.LEFT, 5, 0));
         wrapper.setOpaque(false);
 
-        // 이모티콘 메시지가 아닐 경우 번역 버튼 추가
+        // 번역 버튼 추가
         if (imageIcon == null && message != null && !message.isEmpty()) {
             JButton translateButton = new JButton(
                     new ImageIcon(translateImg.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))
@@ -384,11 +384,14 @@ public class ChattingRoomPanel extends JPanel {
                 }
             });
 
-            wrapper.add(translateButton);
-        }
-
-        if (isMyMessage) {
-            wrapper.add(messagePanel);
+            // 번역 버튼 위치를 송신자에 따라 다르게 추가
+            if (isMyMessage) {
+                wrapper.add(translateButton);
+                wrapper.add(messagePanel);
+            } else {
+                wrapper.add(messagePanel);
+                wrapper.add(translateButton);
+            }
         } else {
             wrapper.add(messagePanel);
         }
