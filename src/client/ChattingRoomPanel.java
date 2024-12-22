@@ -415,11 +415,11 @@ public class ChattingRoomPanel extends JPanel {
 
         // 이모티콘(메뉴아이템)들을 iconPanel에 추가
         iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Curious.png", CuriousEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Everything.png", EverythingEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Everyting.png", EverythingEmoticonImg));
         iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Greet.png", GreetEmoticonImg));
         iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Schedule.png", ScheduleEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Secret.png", SecretEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Translate.png", TranslateEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Curious.png", SecretEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Curious.png", TranslateEmoticonImg));
 
         // 이제 이 iconPanel을 JScrollPane로 감싸고, 높이 제한
         JScrollPane scrollPane = new JScrollPane(iconPanel);
@@ -495,4 +495,6 @@ public class ChattingRoomPanel extends JPanel {
             ex.printStackTrace();
         }
     }
+    // === [버전2 추가] 끝
+    // =======================
 }
