@@ -36,23 +36,22 @@ public class ChattingRoomPanel extends JPanel {
     private ImageIcon pictureImg   = new ImageIcon("src/assets/Picture.png");
     private ImageIcon robotImg     = new ImageIcon("src/assets/Robot.png");
     // 이모티콘 이미지
-    private ImageIcon CuriousEmoticonImg     = new ImageIcon("src/assets/Emoticon-Thumbs.png");
-    private ImageIcon EverythingEmoticonImg  = new ImageIcon("src/assets/Emoticon-Falling-In-Love.png");
-    private ImageIcon GreetEmoticonImg       = new ImageIcon("src/assets/Emoticon-Smile.png");
-    private ImageIcon ScheduleEmoticonImg    = new ImageIcon("src/assets/Emoticon-Funny-And-Sad.png");
-    private ImageIcon SecretEmoticonImg      = new ImageIcon("src/assets/Emoticon-Double-Hearts.png");
-    private ImageIcon TranslateEmoticonImg   = new ImageIcon("src/assets/Emoticon-Sad.png");
+    private ImageIcon ThumbsEmoticonImg = new ImageIcon("src/assets/Emoticon-Thumbs.png");
+    private ImageIcon FallingInLoveEmoticonImg = new ImageIcon("src/assets/Emoticon-Falling-In-Love.png");
+    private ImageIcon SmileEmoticonImg = new ImageIcon("src/assets/Emoticon-Smile.png");
+    private ImageIcon FunnyAndSadEmoticonImg = new ImageIcon("src/assets/Emoticon-Funny-And-Sad.png");
+    private ImageIcon DoubleHeartsEmoticonImg = new ImageIcon("src/assets/Emoticon-Double-Hearts.png");
+    private ImageIcon SadEmoticonImg = new ImageIcon("src/assets/Emoticon-Sad.png");
 
     // 전송 버튼
     private JButton sendButton;
 
     // =======================
-    // === [버전2 추가] ===
     // 이모티콘 팝업
     private JPopupMenu emoticonPopup;
-    // === [버전2 추가] 끝
     // =======================
 
+    // 생성자 (채팅방 화면 초기화, 배피)
     public ChattingRoomPanel(MessengerFrame frame) {
         // GoogleTranslate 객체 초기화
         this.googleTranslate = new GoogleTranslate();
@@ -121,7 +120,7 @@ public class ChattingRoomPanel extends JPanel {
         messageInputField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         messageInputField.setFont(new Font("Arial", Font.PLAIN, 14));
 
-        // 입력창 내용 변화 -> 전송 버튼 색상 변경
+        // 입력창 내용 변화 -> 전송 버튼 색상 변경 -> 안 됨.. 왜!!!!!
         messageInputField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) { updateSendButtonColor(); }
@@ -174,10 +173,41 @@ public class ChattingRoomPanel extends JPanel {
         });
         languageMenu.add(menuItemJa);
 
-        // 필요하다면 다른 언어도 추가
+        // 독일어 (de)
+        JMenuItem menuItemDe = new JMenuItem("독일어(de)");
+        menuItemDe.addActionListener(e -> {
+            this.targetLanguage = "de";
+            System.out.println("[Client] 번역 언어 변경 -> de");
+        });
+        languageMenu.add(menuItemDe);
 
+        // 이탈리아어 (it)
+        JMenuItem menuItemIt = new JMenuItem("이탈리아어(it)");
+        menuItemIt.addActionListener(e -> {
+            this.targetLanguage = "it";
+            System.out.println("[Client] 번역 언어 변경 -> it");
+        });
+        languageMenu.add(menuItemIt);
+
+        // 중국어 간체 (zh-CN)
+        JMenuItem menuItemZhCN = new JMenuItem("중국어 간체(zh-CN)");
+        menuItemZhCN.addActionListener(e -> {
+            this.targetLanguage = "zh-CN";
+            System.out.println("[Client] 번역 언어 변경 -> zh-CN");
+        });
+        languageMenu.add(menuItemZhCN);
+
+        // 스페인어 (es)
+        JMenuItem menuItemEs = new JMenuItem("스페인어(es)");
+        menuItemEs.addActionListener(e -> {
+            this.targetLanguage = "es";
+            System.out.println("[Client] 번역 언어 변경 -> es");
+        });
+        languageMenu.add(menuItemEs);
+
+        // 언어 변경 버튼 붙이기
         languageButton.addActionListener(e -> {
-            languageMenu.show(languageButton, 0, languageButton.getHeight());
+            languageMenu.show(languageButton, 0, languageButton.getHeight()-207); // 채팅 하단 라인과 일치하도록 조정
         });
         leftIconsPanel.add(languageButton);
 
@@ -191,7 +221,7 @@ public class ChattingRoomPanel extends JPanel {
             if (emoticonPopup == null) {
                 emoticonPopup = createEmoticonPopup();
             }
-            emoticonPopup.show(emoticonButton, 0, emoticonButton.getHeight());
+            emoticonPopup.show(emoticonButton, 0, emoticonButton.getHeight()-123); // 채팅창 하단 네모박스에 맞도록 y축 위치 조정
         });
         // =======================
         leftIconsPanel.add(emoticonButton);
@@ -294,13 +324,13 @@ public class ChattingRoomPanel extends JPanel {
             }
         };
         messagePanel.setOpaque(false);
-        messagePanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+        messagePanel.setBorder(BorderFactory.createEmptyBorder(4, 5, 4, 5)); // 이모티콘일 경우 패딩 최소화
 
         JPanel textContainer = new JPanel();
         textContainer.setLayout(new BoxLayout(textContainer, BoxLayout.Y_AXIS));
         textContainer.setOpaque(false);
 
-        // 이미지가 있는 경우 처리
+        // 이미지가 있는 경우 처리 (이모티콘)
         if (imageIcon != null) {
             // 이모티콘 크기 조정 (예: 50x50)
             Image scaledImage = imageIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
@@ -311,7 +341,6 @@ public class ChattingRoomPanel extends JPanel {
             textContainer.add(imageLabel);
         }
 
-
         // 텍스트 메시지 처리
         if (message != null && !message.isEmpty()) {
             JLabel messageLabel = new JLabel("<html>" + message.replaceAll("\n", "<br>") + "</html>");
@@ -319,45 +348,49 @@ public class ChattingRoomPanel extends JPanel {
             messageLabel.setMaximumSize(new Dimension(300, Integer.MAX_VALUE));
             textContainer.add(messageLabel);
         }
+
         messagePanel.add(textContainer, BorderLayout.CENTER);
-
-        JButton translateButton = new JButton(
-                new ImageIcon(translateImg.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))
-        );
-        translateButton.setPreferredSize(new Dimension(25, 25));
-        translateButton.setContentAreaFilled(false);
-        translateButton.setBorderPainted(false);
-        translateButton.setFocusPainted(false);
-
-        translateButton.addActionListener(e -> {
-            try {
-                String translatedText = googleTranslate.translate(message, targetLanguage);
-                System.out.println("[Client] 번역 결과 (" + targetLanguage + "): " + translatedText);
-
-                JLabel translationLabel = new JLabel("<html>"
-                        + translatedText.replaceAll("\n", "<br>")
-                        + "</html>");
-                translationLabel.setForeground(Color.GRAY);
-                translationLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 0, 0));
-
-                textContainer.add(translationLabel);
-                textContainer.revalidate();
-                textContainer.repaint();
-            } catch (Exception ex) {
-                System.out.println("[Client] 번역 중 오류 발생: " + ex.getMessage());
-                ex.printStackTrace();
-            }
-        });
 
         JPanel wrapper = new JPanel(new FlowLayout(isMyMessage ? FlowLayout.RIGHT : FlowLayout.LEFT, 5, 0));
         wrapper.setOpaque(false);
 
-        if (isMyMessage) {
+        // 이모티콘 메시지가 아닐 경우 번역 버튼 추가
+        if (imageIcon == null && message != null && !message.isEmpty()) {
+            JButton translateButton = new JButton(
+                    new ImageIcon(translateImg.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))
+            );
+            translateButton.setPreferredSize(new Dimension(25, 25));
+            translateButton.setContentAreaFilled(false);
+            translateButton.setBorderPainted(false);
+            translateButton.setFocusPainted(false);
+
+            translateButton.addActionListener(e -> {
+                try {
+                    String translatedText = googleTranslate.translate(message, targetLanguage);
+                    System.out.println("[Client] 번역 결과 (" + targetLanguage + "): " + translatedText);
+
+                    JLabel translationLabel = new JLabel("<html>"
+                            + translatedText.replaceAll("\n", "<br>")
+                            + "</html>");
+                    translationLabel.setForeground(Color.GRAY);
+                    translationLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 0, 0));
+
+                    textContainer.add(translationLabel);
+                    textContainer.revalidate();
+                    textContainer.repaint();
+                } catch (Exception ex) {
+                    System.out.println("[Client] 번역 중 오류 발생: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            });
+
             wrapper.add(translateButton);
+        }
+
+        if (isMyMessage) {
             wrapper.add(messagePanel);
         } else {
             wrapper.add(messagePanel);
-            wrapper.add(translateButton);
         }
 
         int currentComponentCount = chatContainer.getComponentCount();
@@ -368,9 +401,10 @@ public class ChattingRoomPanel extends JPanel {
             chatContainer.add(wrapper, 9);
         }
 
+        // 스크롤을 늘 최상단으로 이동
         SwingUtilities.invokeLater(() -> {
             JScrollBar vertical = scrollPane.getVerticalScrollBar();
-            vertical.setValue(vertical.getMaximum());
+            vertical.setValue(vertical.getMinimum());
         });
 
         chatContainer.revalidate();
@@ -413,39 +447,30 @@ public class ChattingRoomPanel extends JPanel {
         }
     }
 
-    // =======================
-    /**
-     * 이모티콘 목록 팝업 생성
-     */
+    // 이모티콘 목록 팝업 생성
     private JPopupMenu createEmoticonPopup() {
         // 원본 JPopupMenu
         JPopupMenu popup = new JPopupMenu();
 
-        // 스크롤 가능한 패널을 만들기 위해, 먼저 JPanel 혹은 Box 생성
+        // 이모티콘 패널 생성
         JPanel iconPanel = new JPanel();
         iconPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        // iconPanel.setPreferredSize(new Dimension(200, 9999));
-        // ↑ 세로 길이를 크게 해두고, 스크롤이 생길 수 있도록 하는 팁(필요하다면)
 
         // 이모티콘(메뉴아이템)들을 iconPanel에 추가
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Thumbs.png", CuriousEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Falling-In-Love.png", EverythingEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Smile.png", GreetEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Funny-And-Sad.png", ScheduleEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Double-Hearts.png", SecretEmoticonImg));
-        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Sad.png", TranslateEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Thumbs.png", ThumbsEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Falling-In-Love.png", FallingInLoveEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Smile.png", SmileEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Funny-And-Sad.png", FunnyAndSadEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Double-Hearts.png", DoubleHeartsEmoticonImg));
+        iconPanel.add(createEmoticonMenuItem("src/assets/Emoticon-Sad.png", SadEmoticonImg));
 
-        // 이제 이 iconPanel을 JScrollPane로 감싸고, 높이 제한
-        JScrollPane scrollPane = new JScrollPane(iconPanel);
-        scrollPane.setPreferredSize(new Dimension(300, 50)); // 최대 높이 50px
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-        // 그리고 JPopupMenu에 scrollPane을 붙인다
-        popup.add(scrollPane);
+        // JPopupMenu에 패널 직접 추가
+        popup.add(iconPanel);
 
         return popup;
     }
+
+    // 이모티콘 받는 경우 처리
     public void receiveEmoticon(String sender, byte[] imageData) {
         try {
             // 바이트 배열을 ImageIcon으로 변환
@@ -465,10 +490,7 @@ public class ChattingRoomPanel extends JPanel {
         }
     }
 
-
-    /**
-     * 이모티콘 메뉴아이템 생성
-     */
+    // 이모티콘 메뉴아이템 생성
     private JButton createEmoticonMenuItem(String filePath, ImageIcon icon) {
         // 기존 icon 이미지를 축소
         Image scaledImg = icon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
@@ -490,11 +512,10 @@ public class ChattingRoomPanel extends JPanel {
         return button;
     }
 
-
     /**
-     * (버전2) 이미지 파일 자체를 소켓으로 전송
-     * 서버는 파일 크기와 바이트 배열을 수신 후,
-     * 동일하게 다른 클라이언트에게 파일을 중계하도록 구현해야 함.
+     * 이미지 파일 자체를 소켓으로 전송
+     * 서버는 파일 크기와 바이트 배열을 수신 후
+     * 동일하게 다른 클라이언트에게 파일을 전송하도록 구현해야 함
      */
     private void sendEmoticonImage(String filePath) {
         File file = new File(filePath);
