@@ -31,5 +31,8 @@ bin/
 ### google translation api ###
 /src/api/google-key.json
 
+### gpt ###
+/src/api/gpt-key.json
+
 ### 임시
-/src/api/GPT.java
+/src/api/GPTService.java

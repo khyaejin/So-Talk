@@ -69,10 +69,14 @@ public class StartPanel extends JPanel {
             String id = idField.getText();
             String password = new String(passwordField.getPassword());
 
-            if (id.equals("test1") && password.equals("1234") || id.equals("test2") && password.equals("1234")) {
+            if (id.equals("test1") && password.equals("1234") || id.equals("test2") && password.equals("1234") || id.equals("test3") && password.equals("1234")) {
                 try {
                     DataOutputStream os = frame.getOutputStream();
-                    String userId = id.equals("test1") ? "1" : "2"; // test1은 ID 1, test2는 ID 2
+                    // test1은 ID 1, test2는 ID 2 tet3은 ID 3
+                    String userId = "";
+                    if(id.equals("test1")) userId="1";
+                    else if(id.equals("test2")) userId="2";
+                    else userId="3";
                     os.writeUTF("SET_ID:" + userId); // 서버에 ID 전송
                     os.writeUTF("SET_NAME:" + id); // 서버에 사용자 이름 전송
 

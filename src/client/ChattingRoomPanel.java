@@ -1,5 +1,6 @@
 package client;
 
+import api.GPTService;
 import api.GoogleTranslate;
 
 import javax.swing.*;
@@ -28,6 +29,9 @@ public class ChattingRoomPanel extends JPanel {
     private GoogleTranslate googleTranslate;
     private String targetLanguage = "ko";   // 기본 번역 언어: "ko" (한국어)
 
+    // --- gpt 관련 필드 ---
+    private GPTService gpt;
+
     // ---- 이미지들 ----
     // 버튼 이미지
     private ImageIcon translateImg = new ImageIcon("src/assets/Translate.png");
@@ -55,7 +59,7 @@ public class ChattingRoomPanel extends JPanel {
     public ChattingRoomPanel(MessengerFrame frame) {
         // GoogleTranslate 객체 초기화
         this.googleTranslate = new GoogleTranslate();
-
+        this.gpt = new GPTService();
         setLayout(new BorderLayout());
         setOpaque(false); // 패널을 투명하게 설정하여 paintComponent로 배경을 그리도록 설정
 
@@ -241,8 +245,35 @@ public class ChattingRoomPanel extends JPanel {
                 new ImageIcon(robotImg.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH))
         );
         styleIconButton(robotButton);
+
+        // 로봇 버튼 클릭 시 GPT 통신
         robotButton.addActionListener(e -> {
+            // GPT 통신
+            String result = gpt.callGptApi();
+            System.out.println("result:" + result);
             System.out.println("[Client] 로봇 버튼 클릭");
+
+            // 텍스트 영역 생성
+            JTextArea textArea = new JTextArea(result);
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+            textArea.setEditable(false);
+
+            // 스크롤 영역 생성
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setPreferredSize(new Dimension(300, 130)); // 크기 설정
+
+            // 커스텀 다이얼로그 생성
+            JDialog dialog = new JDialog((Frame) null, "\uD83D\uDDFA\uFE0F오늘의 세계 지식\uD83E\uDD44", true);
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE); // 닫기 버튼 설정
+            dialog.getContentPane().add(scrollPane); // 내용 추가
+            dialog.pack(); // 내용에 맞게 크기 조정
+
+            // 시작 위치 설정
+//            dialog.setLocationRelativeTo(null); // 화면 중앙
+             dialog.setLocation(25, 150);// 좌표 (100, 100))
+
+            dialog.setVisible(true); // 팝업 표시
         });
         leftIconsPanel.add(robotButton);
 
